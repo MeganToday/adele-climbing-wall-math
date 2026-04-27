@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Adele's Climbing Wall</title>
+<style>
+/* ─── RESET & BASE ──────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; height: 100%;
+  font-family: 'Segoe UI', 'Comic Sans MS', Helvetica, sans-serif;
+  background: #1a1a2e;
+  overflow: hidden;
+  touch-action: manipulation;
+}
+#app {
+  width: 100vw; height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+}
+.screen {
+  display: none;
+  width: 100%; height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0; left: 0;
+}
+.screen.active { display: flex; }
+
+/* ─── WELCOME SCREEN ────────────────────────────────────────── */
+#screen-welcome {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  text-align: center;
+  padding: 40px;
+}
+.welcome-title {
+  font-size: clamp(28px, 6vw, 56px);
+  color: #fff;
+  text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+.welcome-sub {
+  font-size: clamp(18px, 3.5vw, 32px);
+  color: #ffe0f7;
+  margin-bottom: 48px;
+}
+.wall-emoji {
+  font-size: 80px;
+  margin-bottom: 32px;
+  animation: bounce 2s infinite;
+}
+@keyframes bounce {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-12px); }
+}
+
+/* ─── BUTTONS ───────────────────────────────────────────────── */
+.btn {
+  padding: 18px 44px;
+  font-size: clamp(18px, 3vw, 26px);
+  font-weight: bold;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: scale(0.95); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+.btn-primary { background: #ffdd57; color: #333; }
+.btn-secondary { background: rgba(255,255,255,0.2); color: #fff; border: 2px solid rgba(255,255,255,0.5); }
+.btn-danger { background: #ff6b6b; color: #fff; }
+.btn-small {
+  padding: 10px 22px;
+  font-size: clamp(14px, 2.2vw, 20px);
+  border-radius: 30px;
+}
+
+/* ─── STUFFY PICKER SCREEN ──────────────────────────────────── */
+#screen-stuffy {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  padding: 24px;
+  overflow-y: auto;
+}
+.screen-title {
+  font-size: clamp(22px, 4.5vw, 40px);
+  color: #fff;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  margin-bottom: 8px;
+  text-align: center;
+}
+.screen-sub {
+  font-size: clamp(14px, 2.5vw, 22px);
+  color: rgba(255,255,255,0.85);
+  margin-bottom: 24px;
+  text-align: center;
+}
+.stuffy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 16px;
+  max-width: 700px;
+  width: 100%;
+  margin-bottom: 24px;
+}
+.stuffy-card {
+  background: rgba(255,255,255,0.2);
+  border: 3px solid transparent;
+  border-radius: 20px;
+  padding: 20px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s, background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.stuffy-card:active { transform: scale(0.93); }
+.stuffy-card.selected {
+  border-color: #ffdd57;
+  background: rgba(255,221,87,0.3);
+  transform: scale(1.05);
+}
+.stuffy-card.locked {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.stuffy-card .stuffy-icon { font-size: 52px; line-height: 1; margin-bottom: 8px; }
+.stuffy-card .stuffy-label { font-size: clamp(13px, 2vw, 18px); color: #fff; font-weight: bold; }
+.stuffy-card .stuffy-name-tag {
+  font-size: clamp(11px, 1.8vw, 16px);
+  color: #ffe0f7;
+  font-style: italic;
+  margin-top: 4px;
+}
+.stuffy-card .lock-icon { font-size: 22px; margin-top: 4px; }
+
+.name-input-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.name-input-area label {
+  font-size: clamp(16px, 2.5vw, 22px);
+  color: #fff;
+}
+.name-input-area input {
+  font-size: clamp(18px, 3vw, 26px);
+  padding: 12px 20px;
+  border-radius: 30px;
+  border: 3px solid #ffdd57;
+  background: rgba(255,255,255,0.95);
+  color: #333;
+  text-align: center;
+  width: min(320px, 80vw);
+  outline: none;
+}
+
+/* ─── LEVEL SELECT SCREEN ───────────────────────────────────── */
+#screen-levels {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  padding: 24px;
+  overflow-y: auto;
+}
+.level-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  max-width: 720px;
+  width: 100%;
+  margin-bottom: 24px;
+}
+.level-card {
+  background: rgba(255,255,255,0.2);
+  border: 3px solid transparent;
+  border-radius: 20px;
+  padding: 20px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.level-card:active { transform: scale(0.95); }
+.level-card.locked { opacity: 0.45; cursor: not-allowed; }
+.level-card .level-num {
+  font-size: clamp(28px, 5vw, 44px);
+  color: #fff;
+  font-weight: bold;
+}
+.level-card .level-name {
+  font-size: clamp(13px, 2vw, 18px);
+  color: rgba(255,255,255,0.9);
+  margin: 6px 0;
+}
+.level-card .level-theme {
+  font-size: clamp(11px, 1.8vw, 16px);
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 10px;
+}
+.stars-display { font-size: 22px; letter-spacing: 2px; }
+.level-card .lock-icon { font-size: 28px; margin-top: 6px; }
+.current-stuffy-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 50px;
+  padding: 10px 20px;
+  margin-bottom: 20px;
+}
+.current-stuffy-bar .icon { font-size: 36px; }
+.current-stuffy-bar .info { color: #fff; font-size: clamp(13px, 2.2vw, 19px); }
+
+/* ─── CLIMBING WALL SCREEN ──────────────────────────────────── */
+#screen-game {
+  background: #1a1a2e;
+  position: relative;
+}
+.game-header {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(0,0,0,0.45);
+  z-index: 10;
+  gap: 8px;
+}
+.game-header .stuffy-display { font-size: 32px; }
+.game-header .stats {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex: 1;
+  justify-content: center;
+}
+.stat-pill {
+  background: rgba(255,255,255,0.15);
+  border-radius: 20px;
+  padding: 5px 14px;
+  color: #fff;
+  font-size: clamp(12px, 2vw, 17px);
+  font-weight: bold;
+}
+.stat-pill.danger { background: rgba(255,80,80,0.5); }
+#btn-home-game {
+  padding: 8px 18px;
+  font-size: clamp(13px, 2vw, 18px);
+}
+
+.wall-container {
+  position: absolute;
+  top: 60px; bottom: 0; left: 0; right: 0;
+  overflow: hidden;
+}
+#wall-canvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+}
+.top-banner {
+  position: absolute;
+  top: 8px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(90deg, #gold, #ffd700);
+  background: #ffd700;
+  color: #333;
+  font-size: clamp(14px, 2.5vw, 22px);
+  font-weight: bold;
+  padding: 8px 24px;
+  border-radius: 30px;
+  z-index: 5;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.3);
+  white-space: nowrap;
+}
+
+/* ─── ANSWER MODAL ──────────────────────────────────────────── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal-box {
+  background: #fff;
+  border-radius: 28px;
+  padding: 28px 24px 20px;
+  width: min(380px, 92vw);
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  position: relative;
+}
+.modal-problem {
+  font-size: clamp(36px, 8vw, 64px);
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8px;
+  letter-spacing: 4px;
+}
+.modal-answer-display {
+  font-size: clamp(28px, 6vw, 48px);
+  font-weight: bold;
+  color: #4facfe;
+  min-height: 60px;
+  border-bottom: 3px solid #ddd;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  letter-spacing: 6px;
+}
+.modal-answer-display.shake {
+  animation: shake 0.4s ease;
+}
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%      { transform: translateX(-8px); }
+  40%      { transform: translateX(8px); }
+  60%      { transform: translateX(-6px); }
+  80%      { transform: translateX(6px); }
+}
+.modal-answer-display.correct-flash {
+  animation: correctFlash 0.4s ease;
+}
+@keyframes correctFlash {
+  0%   { background: transparent; }
+  50%  { background: #d4edda; border-radius: 8px; }
+  100% { background: transparent; }
+}
+.numpad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.numpad-btn {
+  font-size: clamp(22px, 4.5vw, 36px);
+  font-weight: bold;
+  padding: 16px 8px;
+  border: 2px solid #ddd;
+  border-radius: 14px;
+  background: #f8f9fa;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.1s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.numpad-btn:active { background: #e0e0e0; transform: scale(0.93); }
+.numpad-btn.backspace { background: #fff0f0; color: #e55; }
+.numpad-btn.enter-btn { background: #d4f4dd; color: #2a7a3b; grid-column: span 2; }
+.numpad-btn.zero-btn { grid-column: span 1; }
+
+.hint-area {
+  margin-top: 8px;
+  min-height: 48px;
+}
+.hint-btn {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  color: #856404;
+  border-radius: 20px;
+  padding: 6px 18px;
+  font-size: clamp(14px, 2.2vw, 18px);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.hint-visual {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+  background: #fffbf0;
+  border-radius: 12px;
+  margin-top: 6px;
+}
+.hint-dot {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: #4facfe;
+  display: inline-block;
+}
+.hint-dot.subtract { background: #ff6b6b; }
+.hint-separator {
+  font-size: 20px;
+  font-weight: bold;
+  color: #555;
+  margin: 0 4px;
+}
+.modal-feedback {
+  font-size: clamp(14px, 2.5vw, 20px);
+  min-height: 26px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+.modal-feedback.wrong { color: #e55; }
+.modal-feedback.correct { color: #2a7a3b; }
+
+.modal-miss-indicator {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 6px;
+}
+.miss-dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: #ddd;
+}
+.miss-dot.used { background: #ff6b6b; }
+
+/* ─── LEVEL COMPLETE / FAIL SCREENS ────────────────────────── */
+#screen-complete, #screen-fail {
+  padding: 32px;
+  text-align: center;
+}
+#screen-complete {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+#screen-fail {
+  background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+}
+.complete-title {
+  font-size: clamp(30px, 6vw, 56px);
+  color: #fff;
+  text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+  margin-bottom: 16px;
+}
+.complete-stars {
+  font-size: clamp(44px, 8vw, 72px);
+  margin-bottom: 16px;
+  letter-spacing: 8px;
+}
+.complete-stuffy-reveal {
+  background: rgba(255,255,255,0.3);
+  border-radius: 24px;
+  padding: 24px;
+  margin-bottom: 24px;
+  max-width: 400px;
+  width: 100%;
+}
+.reveal-icon { font-size: 72px; margin-bottom: 8px; }
+.reveal-label { font-size: clamp(18px, 3.5vw, 28px); color: #fff; font-weight: bold; }
+.reveal-sub { font-size: clamp(13px, 2vw, 18px); color: rgba(255,255,255,0.85); margin-top: 4px; }
+.stuffy-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin: 16px 0;
+}
+.stuffy-choice-btn {
+  background: rgba(255,255,255,0.2);
+  border: 3px solid transparent;
+  border-radius: 16px;
+  padding: 12px 6px;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.stuffy-choice-btn:active { transform: scale(0.92); }
+.stuffy-choice-btn.selected { border-color: #ffdd57; background: rgba(255,221,87,0.35); }
+.stuffy-choice-btn .icon { font-size: 36px; }
+.stuffy-choice-btn .lbl { font-size: 12px; color: #fff; margin-top: 4px; }
+
+/* ─── PRACTICE MODE ─────────────────────────────────────────── */
+.practice-badge {
+  position: absolute;
+  top: 14px; left: 50%; transform: translateX(-50%);
+  background: #ff9f43;
+  color: #fff;
+  font-size: clamp(12px, 1.8vw, 16px);
+  font-weight: bold;
+  padding: 4px 16px;
+  border-radius: 20px;
+  z-index: 15;
+  letter-spacing: 1px;
+}
+
+/* ─── CONFETTI ──────────────────────────────────────────────── */
+#confetti-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  pointer-events: none;
+  z-index: 200;
+}
+
+/* ─── STUFFY ANIMATION OVERLAY ──────────────────────────────── */
+.stuffy-anim {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 80px;
+  z-index: 150;
+  pointer-events: none;
+  display: none;
+}
+.stuffy-anim.cheer { animation: cheerAnim 0.7s ease forwards; }
+.stuffy-anim.wrong-anim { animation: wrongAnim 0.6s ease forwards; }
+@keyframes cheerAnim {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  40%  { opacity: 1; transform: translate(-50%, -60%) scale(1.3); }
+  70%  { transform: translate(-50%, -65%) scale(1.1); }
+  100% { opacity: 0; transform: translate(-50%, -80%) scale(0.9); }
+}
+@keyframes wrongAnim {
+  0%,100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+  20%     { opacity: 1; transform: translate(-54%, -50%) scale(1.1); }
+  40%     { opacity: 1; transform: translate(-46%, -50%) scale(1.1); }
+  60%     { opacity: 1; transform: translate(-53%, -50%) scale(1.05); }
+  80%     { opacity: 1; transform: translate(-47%, -50%) scale(1.05); }
+}
+
+/* ─── REVEAL ANIMATION ──────────────────────────────────────── */
+.reveal-box {
+  transition: transform 0.4s;
+}
+.reveal-box.pop-in {
+  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+@keyframes popIn {
+  0%   { transform: scale(0); opacity: 0; }
+  70%  { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ─── SCROLLBAR HIDE ────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 3px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- WELCOME SCREEN                                            -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div id="screen-welcome" class="screen active">
+    <div class="wall-emoji">🧗‍♀️</div>
+    <div class="welcome-title">Welcome to the<br>Climbing Wall Game,<br><span style="color:#ffdd57">Adele!</span></div>
+    <div class="welcome-sub">Climb up the wall by solving math problems!</div>
+    <button class="btn btn-primary" onclick="showScreen('stuffy')">Let's Go! 🎉</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- STUFFY PICKER SCREEN                                      -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div id="screen-stuffy" class="screen">
+    <div class="screen-title">Pick Your Stuffy!</div>
+    <div class="screen-sub">Tap a stuffy to take climbing with you</div>
+    <div class="stuffy-grid" id="stuffy-grid"></div>
+    <div class="name-input-area" id="name-input-area" style="display:none">
+      <label id="name-prompt-label">What's your stuffy's name?</label>
+      <input type="text" id="stuffy-name-input" maxlength="20" placeholder="Type a name..." autocomplete="off" autocorrect="off">
+    </div>
+    <div style="display:flex;gap:16px;margin-top:4px">
+      <button class="btn btn-secondary btn-small" onclick="showScreen('levels')" id="btn-skip-naming">Back</button>
+      <button class="btn btn-primary" id="btn-confirm-stuffy" onclick="confirmStuffySelection()" disabled>Let's Climb! 🧗</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- LEVEL SELECT SCREEN                                       -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div id="screen-levels" class="screen">
+    <div style="background:linear-gradient(135deg,#4facfe,#00f2fe);width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;overflow-y:auto;">
+      <div class="screen-title" style="color:#fff">Choose a Level!</div>
+      <div class="current-stuffy-bar" id="current-stuffy-bar">
+        <span class="icon" id="bar-stuffy-icon">🐰</span>
+        <span class="info" id="bar-stuffy-info">Fluffy is ready to climb!</span>
+      </div>
+      <div class="level-grid" id="level-grid"></div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center">
+        <button class="btn btn-secondary btn-small" onclick="showScreen('stuffy')">Change Stuffy</button>
+        <button class="btn btn-small" style="background:#ff9f43;color:#fff" onclick="startPracticeMode()">🎯 Practice Mode</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- GAME SCREEN                                               -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div id="screen-game" class="screen">
+    <div class="game-header">
+      <span class="stuffy-display" id="game-stuffy-icon">🐰</span>
+      <div class="stats">
+        <span class="stat-pill" id="stat-solved">✅ 0</span>
+        <span class="stat-pill" id="stat-remaining">🪨 30</span>
+        <span class="stat-pill" id="stat-misses">❌ 0/2</span>
+      </div>
+      <button class="btn btn-secondary btn-small" id="btn-home-game" onclick="goHome()">🏠 Home</button>
+    </div>
+    <div class="wall-container">
+      <canvas id="wall-canvas"></canvas>
+      <div class="top-banner" id="top-banner">🏆 Reach the Top!</div>
+    </div>
+    <div id="practice-badge" class="practice-badge" style="display:none">⭐ PRACTICE MODE — No wrong answers count!</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- LEVEL COMPLETE SCREEN                                     -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div id="screen-complete" class="screen">
+    <div class="complete-title" id="complete-title">🎉 You made it to the top!</div>
+    <div class="complete-stars" id="complete-stars">⭐⭐⭐</div>
+    <div class="complete-stuffy-reveal" id="stuffy-reveal-area">
+      <div id="reveal-content"></div>
+    </div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center">
+      <button class="btn btn-secondary btn-small" onclick="goHome()">🏠 Home</button>
+      <button class="btn btn-primary" id="btn-next-level" onclick="goNextLevel()">Next Level ➡️</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- LEVEL FAIL SCREEN                                         -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div id="screen-fail" class="screen">
+    <div style="font-size:80px;margin-bottom:16px">💪</div>
+    <div class="complete-title" style="color:#fff">Almost There, Adele!</div>
+    <div style="font-size:clamp(16px,3vw,24px);color:rgba(255,255,255,0.9);margin-bottom:32px;text-align:center;max-width:400px">
+      That level was tricky! Let's try it again — you can do it!
+    </div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center">
+      <button class="btn btn-secondary btn-small" onclick="goHome()">🏠 Home</button>
+      <button class="btn btn-primary" onclick="retryLevel()">Try Again! 🧗</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- ANSWER MODAL                                              -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="answer-modal">
+    <div class="modal-box">
+      <div class="modal-problem" id="modal-problem">3 + 4 = ?</div>
+      <div class="modal-answer-display" id="modal-answer-display">_</div>
+      <div class="modal-feedback" id="modal-feedback"></div>
+      <div class="numpad">
+        <button class="numpad-btn" onclick="numpadPress(7)">7</button>
+        <button class="numpad-btn" onclick="numpadPress(8)">8</button>
+        <button class="numpad-btn" onclick="numpadPress(9)">9</button>
+        <button class="numpad-btn" onclick="numpadPress(4)">4</button>
+        <button class="numpad-btn" onclick="numpadPress(5)">5</button>
+        <button class="numpad-btn" onclick="numpadPress(6)">6</button>
+        <button class="numpad-btn" onclick="numpadPress(1)">1</button>
+        <button class="numpad-btn" onclick="numpadPress(2)">2</button>
+        <button class="numpad-btn" onclick="numpadPress(3)">3</button>
+        <button class="numpad-btn backspace" onclick="numpadBackspace()">⌫</button>
+        <button class="numpad-btn zero-btn" onclick="numpadPress(0)">0</button>
+        <button class="numpad-btn enter-btn" onclick="numpadEnter()">✓ Enter</button>
+      </div>
+      <div class="hint-area" id="hint-area">
+        <button class="hint-btn" id="hint-btn" style="display:none" onclick="showHint()">💡 Need a hint?</button>
+        <div id="hint-visual" style="display:none"></div>
+      </div>
+      <div class="miss-indicator-row" style="display:flex;justify-content:center;gap:8px;margin-top:8px">
+        <div class="miss-dot" id="miss1"></div>
+        <div class="miss-dot" id="miss2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STUFFY ANIMATION OVERLAY -->
+  <div class="stuffy-anim" id="stuffy-anim"></div>
+  <!-- CONFETTI CANVAS -->
+  <canvas id="confetti-canvas"></canvas>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════
+// CONFIG — Stuffies. To add a real photo: set icon to '' and
+// img to the filename (e.g. 'bunny.png'). Place the file next to
+// index.html.
+// ════════════════════════════════════════════════════════════════════
+const STUFFY_DEFS = [
+  { id: 'bunny',    icon: '🐰', img: null, label: 'Bunny',      unlockLevel: 0 },
+  { id: 'bear',     icon: '🐻', img: null, label: 'Bear',       unlockLevel: 0 },
+  { id: 'pinkbear', icon: '🩷', img: null, label: 'Pink Bear',  unlockLevel: 0 },
+  { id: 'koala',    icon: '🐨', img: null, label: 'Koala',      unlockLevel: 0 },
+  { id: 'spider',   icon: '🕷️', img: null, label: 'Spider',     unlockLevel: 0 },
+  // Earned stuffies — one unlocked per level 1-3, choice of 5 on level 4
+  { id: 'cat',      icon: '🐱', img: null, label: 'Cat',        unlockLevel: 1 },
+  { id: 'dog',      icon: '🐶', img: null, label: 'Dog',        unlockLevel: 2 },
+  { id: 'fox',      icon: '🦊', img: null, label: 'Fox',        unlockLevel: 3 },
+  { id: 'penguin',  icon: '🐧', img: null, label: 'Penguin',    unlockLevel: 4 },
+  { id: 'unicorn',  icon: '🦄', img: null, label: 'Unicorn',    unlockLevel: 4 },
+  { id: 'dragon',   icon: '🐲', img: null, label: 'Dragon',     unlockLevel: 4 },
+  { id: 'owl',      icon: '🦉', img: null, label: 'Owl',        unlockLevel: 4 },
+  { id: 'duck',     icon: '🦆', img: null, label: 'Duck',       unlockLevel: 4 },
+];
+
+// ════════════════════════════════════════════════════════════════════
+// LEVEL CONFIG
+// ════════════════════════════════════════════════════════════════════
+const LEVELS = [
+  {
+    num: 1, name: 'Addition', theme: '🏟️ Indoor Gym',
+    bg: ['#667eea','#764ba2'],
+    rockColor: '#8B6F8A', rockHighlight: '#B89AB6', rockGray: '#555',
+    generate: () => {
+      const a = rand(1,9), b = rand(1,9);
+      return { display: `${a} + ${b}`, answer: a+b };
+    }
+  },
+  {
+    num: 2, name: 'Subtraction', theme: '🏔️ Outdoor Cliff',
+    bg: ['#4facfe','#00f2fe'],
+    rockColor: '#5B8A8A', rockHighlight: '#7ABCBC', rockGray: '#445',
+    generate: () => {
+      const b = rand(0,9), a = rand(b,9);
+      return { display: `${a} − ${b}`, answer: a-b };
+    }
+  },
+  {
+    num: 3, name: 'Teen + Single', theme: '❄️ Snowy Mountain',
+    bg: ['#a8edea','#fed6e3'],
+    rockColor: '#7A9FAA', rockHighlight: '#A8CBd3', rockGray: '#667',
+    generate: () => {
+      const a = rand(10,19), b = rand(1,9);
+      return { display: `${a} + ${b}`, answer: a+b };
+    }
+  },
+  {
+    num: 4, name: 'Teen − Single', theme: '🌿 Jungle Wall',
+    bg: ['#56ab2f','#a8e063'],
+    rockColor: '#4A7A3A', rockHighlight: '#6A9A5A', rockGray: '#445',
+    generate: () => {
+      const b = rand(0,9), a = rand(Math.max(10,10+b),19);
+      return { display: `${a} − ${b}`, answer: a-b };
+    }
+  },
+];
+
+// ════════════════════════════════════════════════════════════════════
+// GAME STATE
+// ════════════════════════════════════════════════════════════════════
+const state = {
+  unlockedStuffies: new Set(['bunny','bear','pinkbear','koala','spider']),
+  stuffyNames: {},          // id -> custom name
+  levelStars: {},           // levelNum -> 0-3
+  selectedStuffyId: null,
+  currentLevel: 1,
+  practiceMode: false,
+};
+
+// Runtime game state (reset per play)
+let game = {};
+
+// ════════════════════════════════════════════════════════════════════
+// SCREEN NAVIGATION
+// ════════════════════════════════════════════════════════════════════
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  if (name === 'stuffy')  renderStuffyPicker();
+  if (name === 'levels')  renderLevelSelect();
+}
+
+function goHome() {
+  closeModal();
+  showScreen('stuffy');
+}
+
+// ════════════════════════════════════════════════════════════════════
+// STUFFY PICKER
+// ════════════════════════════════════════════════════════════════════
+function renderStuffyPicker() {
+  const grid = document.getElementById('stuffy-grid');
+  grid.innerHTML = '';
+  STUFFY_DEFS.forEach(s => {
+    if (s.unlockLevel > 0 && !state.unlockedStuffies.has(s.id)) return; // skip locked earned ones
+    const card = document.createElement('div');
+    card.className = 'stuffy-card' + (s.id === state.selectedStuffyId ? ' selected' : '');
+    card.innerHTML = `
+      <div class="stuffy-icon">${stuffyIcon(s)}</div>
+      <div class="stuffy-label">${s.label}</div>
+      ${state.stuffyNames[s.id] ? `<div class="stuffy-name-tag">"${state.stuffyNames[s.id]}"</div>` : ''}
+    `;
+    card.addEventListener('click', () => selectStuffy(s.id, card));
+    grid.appendChild(card);
+  });
+
+  // restore selection UI
+  if (state.selectedStuffyId) {
+    showNameInputFor(state.selectedStuffyId);
+    document.getElementById('btn-confirm-stuffy').disabled = false;
+  } else {
+    document.getElementById('name-input-area').style.display = 'none';
+    document.getElementById('btn-confirm-stuffy').disabled = true;
+  }
+  document.getElementById('btn-skip-naming').textContent = 'Back';
+}
+
+function stuffyIcon(s) {
+  if (s.img) return `<img src="${s.img}" style="width:52px;height:52px;object-fit:contain;border-radius:8px" alt="${s.label}">`;
+  return s.icon;
+}
+
+function selectStuffy(id, cardEl) {
+  state.selectedStuffyId = id;
+  document.querySelectorAll('.stuffy-card').forEach(c => c.classList.remove('selected'));
+  if (cardEl) cardEl.classList.add('selected');
+  showNameInputFor(id);
+  document.getElementById('btn-confirm-stuffy').disabled = false;
+}
+
+function showNameInputFor(id) {
+  const s = STUFFY_DEFS.find(x => x.id === id);
+  const area = document.getElementById('name-input-area');
+  area.style.display = 'flex';
+  document.getElementById('name-prompt-label').textContent = `What's ${s.label}'s name?`;
+  const inp = document.getElementById('stuffy-name-input');
+  inp.value = state.stuffyNames[id] || '';
+  inp.placeholder = s.label;
+}
+
+function confirmStuffySelection() {
+  if (!state.selectedStuffyId) return;
+  const nameVal = document.getElementById('stuffy-name-input').value.trim();
+  if (nameVal) state.stuffyNames[state.selectedStuffyId] = nameVal;
+  showScreen('levels');
+}
+
+function stuffyDisplayName(id) {
+  const s = STUFFY_DEFS.find(x => x.id === id);
+  if (!s) return '?';
+  return state.stuffyNames[id] || s.label;
+}
+
+function getStuffyIcon(id) {
+  const s = STUFFY_DEFS.find(x => x.id === id);
+  return s ? stuffyIcon(s) : '🐾';
+}
+
+// ════════════════════════════════════════════════════════════════════
+// LEVEL SELECT
+// ════════════════════════════════════════════════════════════════════
+function renderLevelSelect() {
+  // stuffy bar
+  const id = state.selectedStuffyId;
+  if (id) {
+    document.getElementById('bar-stuffy-icon').innerHTML = getStuffyIcon(id);
+    document.getElementById('bar-stuffy-info').textContent =
+      `${stuffyDisplayName(id)} is ready to climb!`;
+  }
+
+  const grid = document.getElementById('level-grid');
+  grid.innerHTML = '';
+  LEVELS.forEach(lvl => {
+    const stars = state.levelStars[lvl.num] || 0;
+    const card = document.createElement('div');
+    card.className = 'level-card';
+    card.innerHTML = `
+      <div class="level-num">Level ${lvl.num}</div>
+      <div class="level-name">${lvl.name}</div>
+      <div class="level-theme">${lvl.theme}</div>
+      <div class="stars-display">${starStr(stars)}</div>
+    `;
+    card.addEventListener('click', () => startLevel(lvl.num, false));
+    grid.appendChild(card);
+  });
+}
+
+function starStr(n) {
+  return '⭐'.repeat(n) + '☆'.repeat(3 - n);
+}
+
+// ════════════════════════════════════════════════════════════════════
+// WALL GENERATION
+// ════════════════════════════════════════════════════════════════════
+// Wall has ROWS rows with varying rock counts, connected adjacently.
+// Layout is: bottom row widest, top row narrowest (1 node = finish).
+// We use a fixed layout of 30 rocks across 7 rows.
+const WALL_ROW_SIZES = [7, 6, 5, 5, 4, 2, 1]; // total = 30 ✓
+
+function buildWall(levelNum) {
+  const lvl = LEVELS[levelNum - 1];
+  const rows = [];
+  let id = 0;
+  WALL_ROW_SIZES.forEach((count, ri) => {
+    const row = [];
+    for (let c = 0; c < count; c++) {
+      const prob = lvl.generate();
+      row.push({
+        id: id++, row: ri, col: c,
+        rowSize: count,
+        problem: prob.display,
+        answer: prob.answer,
+        state: 'inactive',   // 'inactive' | 'reachable' | 'solved' | 'grayed'
+        missCount: 0,
+      });
+    }
+    rows.push(row);
+  });
+
+  // Build adjacency: rock r at (row, col) connects upward to rocks in row-1
+  // whose col indices overlap (using fractional positioning)
+  rows.forEach((row, ri) => {
+    if (ri === 0) return;
+    const prevRow = rows[ri - 1];
+    row.forEach(rock => {
+      // fractional position in [0,1]
+      const frac = rock.col / Math.max(1, rock.rowSize - 1);
+      // find closest 2 rocks in prevRow
+      const prevFracs = prevRow.map(r => ({
+        rock: r,
+        dist: Math.abs(r.col / Math.max(1, r.rowSize - 1) - frac)
+      }));
+      prevFracs.sort((a,b) => a.dist - b.dist);
+      rock.parentsUp = prevFracs.slice(0, 2).map(x => x.rock.id);
+    });
+  });
+
+  // Bottom row all reachable to start
+  rows[0].forEach(r => r.state = 'reachable');
+
+  return { rows, currentRockId: null };
+}
+
+function getReachableFrom(wall, rockId) {
+  // Rocks reachable from a solved rock: rocks in the row above whose parentsUp includes rockId
+  if (rockId === null) return []; // at bottom, already seeded
+  const allRocks = wall.rows.flat();
+  const rock = allRocks.find(r => r.id === rockId);
+  if (!rock) return [];
+  const nextRowIdx = rock.row - 1;
+  if (nextRowIdx < 0) return [];
+  return wall.rows[nextRowIdx].filter(r => r.parentsUp && r.parentsUp.includes(rockId));
+}
+
+function updateReachability(wall) {
+  const allRocks = wall.rows.flat();
+  // Reachable: if currentRockId is null, bottom row. Otherwise, rocks above current.
+  const cur = wall.currentRockId;
+  if (cur === null) {
+    // already seeded
+    return;
+  }
+  const newReachable = getReachableFrom(wall, cur);
+  newReachable.forEach(r => {
+    if (r.state === 'inactive') r.state = 'reachable';
+  });
+}
+
+// ════════════════════════════════════════════════════════════════════
+// CANVAS RENDERING
+// ════════════════════════════════════════════════════════════════════
+let canvas, ctx;
+let rockPositions = {}; // id -> {x,y,r}
+
+function initCanvas() {
+  canvas = document.getElementById('wall-canvas');
+  ctx = canvas.getContext('2d');
+  resizeCanvas();
+  canvas.addEventListener('click', onCanvasClick);
+  canvas.addEventListener('touchend', onCanvasTouchEnd, { passive: false });
+}
+
+function resizeCanvas() {
+  const container = canvas.parentElement;
+  canvas.width = container.clientWidth;
+  canvas.height = container.clientHeight;
+  if (game.wall) computeRockPositions();
+}
+
+function computeRockPositions() {
+  const W = canvas.width, H = canvas.height;
+  const rows = game.wall.rows;
+  const totalRows = rows.length;
+  const pad = 48;
+  const usableH = H - pad * 2;
+  const rowH = usableH / (totalRows - 1 || 1);
+
+  rockPositions = {};
+  rows.forEach((row, ri) => {
+    const y = H - pad - ri * rowH;
+    row.forEach((rock, ci) => {
+      const n = row.length;
+      const usableW = W - pad * 2;
+      const x = n === 1 ? W / 2 : pad + ci * (usableW / (n - 1));
+      const r = Math.min(Math.max(W / (n * 2.8 + 2), 26), 48);
+      rockPositions[rock.id] = { x, y, r };
+    });
+  });
+}
+
+function drawWall() {
+  if (!ctx || !game.wall) return;
+  const lvl = LEVELS[game.levelNum - 1];
+  const W = canvas.width, H = canvas.height;
+
+  // Background gradient
+  const grad = ctx.createLinearGradient(0, 0, W, H);
+  grad.addColorStop(0, lvl.bg[0]);
+  grad.addColorStop(1, lvl.bg[1]);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  const allRocks = game.wall.rows.flat();
+
+  // Draw connection lines first (behind rocks)
+  allRocks.forEach(rock => {
+    if (!rock.parentsUp) return;
+    const pos = rockPositions[rock.id];
+    if (!pos) return;
+    rock.parentsUp.forEach(pid => {
+      const ppos = rockPositions[pid];
+      if (!ppos) return;
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+      ctx.lineTo(ppos.x, ppos.y);
+      ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    });
+  });
+
+  // Draw rocks
+  allRocks.forEach(rock => {
+    const pos = rockPositions[rock.id];
+    if (!pos) return;
+    drawRock(rock, pos.x, pos.y, pos.r);
+  });
+
+  // Draw stuffy at current position
+  if (game.wall.currentRockId !== null) {
+    const pos = rockPositions[game.wall.currentRockId];
+    if (pos) {
+      ctx.font = `${Math.round(pos.r * 1.5)}px serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(stuffyEmoji(), pos.x, pos.y - pos.r * 1.4);
+    }
+  }
+
+  // Top flag
+  const topRock = game.wall.rows[game.wall.rows.length - 1][0];
+  const topPos = rockPositions[topRock.id];
+  if (topPos) {
+    ctx.font = `${Math.round(topPos.r * 1.8)}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🏆', topPos.x, topPos.y - topPos.r * 2.2);
+  }
+}
+
+function drawRock(rock, x, y, r) {
+  const state = rock.state;
+  const lvl = LEVELS[game.levelNum - 1];
+
+  let fillColor, strokeColor, textColor, glowColor;
+  if (state === 'grayed') {
+    fillColor = lvl.rockGray; strokeColor = '#888'; textColor = '#999'; glowColor = null;
+  } else if (state === 'solved') {
+    fillColor = '#2a7a3b'; strokeColor = '#43e97b'; textColor = '#fff'; glowColor = '#43e97b';
+  } else if (state === 'reachable') {
+    fillColor = lvl.rockHighlight; strokeColor = '#ffdd57'; textColor = '#fff'; glowColor = '#ffdd57';
+  } else {
+    fillColor = lvl.rockColor; strokeColor = 'rgba(255,255,255,0.25)'; textColor = 'rgba(255,255,255,0.6)'; glowColor = null;
+  }
+
+  // Glow
+  if (glowColor) {
+    ctx.shadowColor = glowColor;
+    ctx.shadowBlur = 14;
+  }
+
+  // Rock shape (irregular polygon approximation)
+  ctx.beginPath();
+  const pts = getRockPoints(x, y, r, rock.id);
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+  ctx.closePath();
+  ctx.fillStyle = fillColor;
+  ctx.fill();
+  ctx.strokeStyle = strokeColor;
+  ctx.lineWidth = state === 'reachable' ? 3 : 2;
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // Problem text
+  if (state !== 'grayed') {
+    ctx.fillStyle = textColor;
+    const fontSize = Math.max(10, Math.min(r * 0.55, 18));
+    ctx.font = `bold ${fontSize}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    // Wrap if needed
+    const text = rock.problem;
+    ctx.fillText(text, x, y);
+  } else {
+    ctx.fillStyle = '#777';
+    ctx.font = `bold ${r * 0.8}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('✗', x, y);
+  }
+}
+
+// Deterministic irregular rock shape from rock id seed
+function getRockPoints(x, y, r, seed) {
+  const sides = 7;
+  const pts = [];
+  const rng = seededRng(seed * 137);
+  for (let i = 0; i < sides; i++) {
+    const angle = (i / sides) * Math.PI * 2 - Math.PI / 2;
+    const jitter = 0.65 + rng() * 0.55;
+    const jitterAng = angle + (rng() - 0.5) * 0.5;
+    pts.push({ x: x + Math.cos(jitterAng) * r * jitter, y: y + Math.sin(jitterAng) * r * jitter });
+  }
+  return pts;
+}
+
+function seededRng(seed) {
+  let s = seed;
+  return () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+}
+
+function stuffyEmoji() {
+  const s = STUFFY_DEFS.find(x => x.id === state.selectedStuffyId);
+  return s ? s.icon : '🐾';
+}
+
+// ════════════════════════════════════════════════════════════════════
+// GAME FLOW
+// ════════════════════════════════════════════════════════════════════
+function startLevel(levelNum, practice) {
+  state.currentLevel = levelNum;
+  state.practiceMode = practice || false;
+  game = {
+    levelNum,
+    wall: buildWall(levelNum),
+    solved: 0,
+    missedRocks: 0,
+    wrongAnswers: 0,
+    activeRockId: null,
+    currentMissesOnRock: 0,
+  };
+  showScreen('game');
+
+  // Set background
+  const lvl = LEVELS[levelNum - 1];
+  const grad = `linear-gradient(135deg, ${lvl.bg[0]}, ${lvl.bg[1]})`;
+  document.getElementById('screen-game').style.background = grad;
+
+  document.getElementById('practice-badge').style.display = practice ? 'block' : 'none';
+  document.getElementById('game-stuffy-icon').innerHTML = getStuffyIcon(state.selectedStuffyId);
+
+  if (!canvas) initCanvas();
+  else resizeCanvas();
+  computeRockPositions();
+  drawWall();
+  updateStats();
+}
+
+function startPracticeMode() {
+  if (!state.selectedStuffyId) {
+    alert('Pick a stuffy first!');
+    return;
+  }
+  // Practice on level 1 by default (or last played)
+  startLevel(state.currentLevel, true);
+}
+
+function retryLevel() {
+  startLevel(state.currentLevel, false);
+}
+
+function goNextLevel() {
+  const next = state.currentLevel + 1;
+  if (next > LEVELS.length) {
+    showScreen('levels');
+  } else {
+    showScreen('levels');
+  }
+}
+
+function updateStats() {
+  const total = game.wall.rows.flat().length;
+  document.getElementById('stat-solved').textContent = `✅ ${game.solved}`;
+  document.getElementById('stat-remaining').textContent = `🪨 ${total - game.solved}`;
+  const missEl = document.getElementById('stat-misses');
+  missEl.textContent = `❌ ${game.missedRocks}/2`;
+  missEl.className = 'stat-pill' + (game.missedRocks >= 1 ? ' danger' : '');
+}
+
+// ════════════════════════════════════════════════════════════════════
+// CANVAS CLICK / TOUCH
+// ════════════════════════════════════════════════════════════════════
+function onCanvasClick(e) {
+  const rect = canvas.getBoundingClientRect();
+  const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+  const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+  handleTap(x, y);
+}
+
+function onCanvasTouchEnd(e) {
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const t = e.changedTouches[0];
+  const x = (t.clientX - rect.left) * (canvas.width / rect.width);
+  const y = (t.clientY - rect.top) * (canvas.height / rect.height);
+  handleTap(x, y);
+}
+
+function handleTap(x, y) {
+  if (document.getElementById('answer-modal').classList.contains('active')) return;
+  const allRocks = game.wall.rows.flat();
+  for (const rock of allRocks) {
+    if (rock.state !== 'reachable') continue;
+    const pos = rockPositions[rock.id];
+    if (!pos) continue;
+    const dx = x - pos.x, dy = y - pos.y;
+    if (Math.sqrt(dx*dx + dy*dy) <= pos.r * 1.3) {
+      openAnswerModal(rock);
+      return;
+    }
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// ANSWER MODAL
+// ════════════════════════════════════════════════════════════════════
+let modalAnswer = '';
+let modalRock = null;
+
+function openAnswerModal(rock) {
+  modalRock = rock;
+  modalAnswer = '';
+  game.activeRockId = rock.id;
+  game.currentMissesOnRock = 0;
+
+  document.getElementById('modal-problem').textContent = rock.problem + ' = ?';
+  document.getElementById('modal-answer-display').textContent = '_';
+  document.getElementById('modal-feedback').textContent = '';
+  document.getElementById('modal-feedback').className = 'modal-feedback';
+  document.getElementById('hint-btn').style.display = 'none';
+  document.getElementById('hint-visual').style.display = 'none';
+  document.getElementById('miss1').className = 'miss-dot' + (game.missedRocks >= 1 ? ' used' : '');
+  document.getElementById('miss2').className = 'miss-dot' + (game.missedRocks >= 2 ? ' used' : '');
+
+  document.getElementById('answer-modal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('answer-modal').classList.remove('active');
+  modalRock = null;
+  modalAnswer = '';
+}
+
+function numpadPress(n) {
+  if (modalAnswer.length >= 3) return;
+  modalAnswer += String(n);
+  document.getElementById('modal-answer-display').textContent = modalAnswer;
+}
+
+function numpadBackspace() {
+  modalAnswer = modalAnswer.slice(0, -1);
+  document.getElementById('modal-answer-display').textContent = modalAnswer || '_';
+}
+
+function numpadEnter() {
+  if (!modalAnswer || !modalRock) return;
+  const given = parseInt(modalAnswer, 10);
+  const correct = modalRock.answer;
+
+  if (given === correct) {
+    // Correct!
+    playSound('correct');
+    const display = document.getElementById('modal-answer-display');
+    display.classList.add('correct-flash');
+    setTimeout(() => display.classList.remove('correct-flash'), 400);
+    document.getElementById('modal-feedback').textContent = '🎉 Correct!';
+    document.getElementById('modal-feedback').className = 'modal-feedback correct';
+    showStuffyAnim('cheer');
+    const rockToSolve = modalRock;
+    setTimeout(() => {
+      closeModal();
+      markRockSolved(rockToSolve);
+    }, 600);
+  } else {
+    // Wrong
+    playSound('wrong');
+    const display = document.getElementById('modal-answer-display');
+    display.classList.add('shake');
+    setTimeout(() => display.classList.remove('shake'), 400);
+    showStuffyAnim('wrong-anim');
+    game.currentMissesOnRock++;
+
+    if (game.currentMissesOnRock === 1) {
+      // First miss — freebie
+      document.getElementById('modal-feedback').textContent = 'Oops! Try again! 💪';
+      document.getElementById('modal-feedback').className = 'modal-feedback wrong';
+      document.getElementById('hint-btn').style.display = 'inline-block';
+      modalAnswer = '';
+      document.getElementById('modal-answer-display').textContent = '_';
+    } else {
+      // Second miss — show answer, gray rock
+      document.getElementById('modal-feedback').textContent = `The answer was ${correct}. Keep going!`;
+      document.getElementById('modal-feedback').className = 'modal-feedback wrong';
+      if (!state.practiceMode) game.missedRocks++;
+      updateStats();
+      document.getElementById('miss1').className = 'miss-dot' + (game.missedRocks >= 1 ? ' used' : '');
+      document.getElementById('miss2').className = 'miss-dot' + (game.missedRocks >= 2 ? ' used' : '');
+      setTimeout(() => {
+        closeModal();
+        grayOutRock(game.activeRockId);
+        if (!state.practiceMode && game.missedRocks >= 2) {
+          setTimeout(triggerLevelFail, 400);
+        }
+      }, 1800);
+    }
+  }
+}
+
+function markRockSolved(rock) {
+  if (!rock) return;
+  const r = game.wall.rows.flat().find(x => x.id === rock.id);
+  if (!r) return;
+  r.state = 'solved';
+  game.solved++;
+  game.wall.currentRockId = r.id;
+
+  // Check win: top rock (last row, first element) solved
+  const topRock = game.wall.rows[game.wall.rows.length - 1][0];
+  if (r.id === topRock.id) {
+    setTimeout(triggerLevelComplete, 400);
+    return;
+  }
+
+  // Mark new reachable rocks
+  updateReachability(game.wall);
+  drawWall();
+  updateStats();
+}
+
+function grayOutRock(rockId) {
+  const r = game.wall.rows.flat().find(x => x.id === rockId);
+  if (r) r.state = 'grayed';
+  drawWall();
+  updateStats();
+}
+
+// ════════════════════════════════════════════════════════════════════
+// HINT
+// ════════════════════════════════════════════════════════════════════
+function showHint() {
+  document.getElementById('hint-btn').style.display = 'none';
+  const rock = game.wall.rows.flat().find(r => r.id === game.activeRockId);
+  if (!rock) return;
+  const container = document.getElementById('hint-visual');
+  container.style.display = 'flex';
+
+  // Parse the problem: "a OP b"
+  const parts = rock.problem.split(' ');
+  const a = parseInt(parts[0]);
+  const op = parts[1];
+  const b = parseInt(parts[2]);
+
+  container.innerHTML = '';
+  // Show "a" dots
+  for (let i = 0; i < Math.min(a, 20); i++) {
+    const d = document.createElement('span');
+    d.className = 'hint-dot';
+    container.appendChild(d);
+  }
+  if (a > 20) {
+    const s = document.createElement('span');
+    s.className = 'hint-separator';
+    s.textContent = `(${a})`;
+    container.appendChild(s);
+  }
+  // Operator
+  const sep = document.createElement('span');
+  sep.className = 'hint-separator';
+  sep.textContent = op === '−' ? ' − ' : ' + ';
+  container.appendChild(sep);
+  // Show "b" dots
+  for (let i = 0; i < Math.min(b, 20); i++) {
+    const d = document.createElement('span');
+    d.className = 'hint-dot' + (op === '−' ? ' subtract' : '');
+    container.appendChild(d);
+  }
+  if (b > 20) {
+    const s = document.createElement('span');
+    s.className = 'hint-separator';
+    s.textContent = `(${b})`;
+    container.appendChild(s);
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// LEVEL COMPLETE / FAIL
+// ════════════════════════════════════════════════════════════════════
+function triggerLevelComplete() {
+  playSound('bell');
+  launchConfetti();
+  const misses = game.missedRocks;
+  const stars = misses === 0 ? 3 : misses === 1 ? 2 : 1;
+  state.levelStars[game.levelNum] = Math.max(state.levelStars[game.levelNum] || 0, stars);
+
+  document.getElementById('complete-title').textContent = '🎉 You made it to the top, Adele!';
+  document.getElementById('complete-stars').textContent = starStr(stars);
+
+  // Stuffy unlock
+  buildStuffyReveal(game.levelNum);
+
+  const nextBtn = document.getElementById('btn-next-level');
+  if (game.levelNum >= LEVELS.length) {
+    nextBtn.style.display = 'none';
+  } else {
+    nextBtn.style.display = 'inline-block';
+    nextBtn.textContent = `Level ${game.levelNum + 1} ➡️`;
+  }
+
+  setTimeout(() => showScreen('complete'), 2200);
+}
+
+function triggerLevelFail() {
+  showScreen('fail');
+}
+
+function buildStuffyReveal(levelNum) {
+  const area = document.getElementById('reveal-content');
+  const earned = STUFFY_DEFS.filter(s => s.unlockLevel === levelNum && !state.unlockedStuffies.has(s.id));
+
+  if (earned.length === 0) {
+    area.innerHTML = `<div class="reveal-label">Amazing climbing, Adele! 🧗</div>
+      <div class="reveal-sub">You're a climbing star!</div>`;
+    return;
+  }
+
+  if (levelNum < 4) {
+    // Surprise reveal — one stuffy
+    const stuffy = earned[0];
+    state.unlockedStuffies.add(stuffy.id);
+    area.innerHTML = `
+      <div class="reveal-label">You unlocked a new stuffy!</div>
+      <div class="reveal-box pop-in" style="margin:12px 0">
+        <div class="reveal-icon">${stuffyIcon(stuffy)}</div>
+        <div class="reveal-label">${stuffy.label}</div>
+      </div>
+      <div class="reveal-sub">Name your new stuffy on the next screen!</div>
+    `;
+  } else {
+    // Level 4 — pick from 5
+    area.innerHTML = `
+      <div class="reveal-label">Pick your new stuffy!</div>
+      <div class="stuffy-choice-grid" id="choice-grid"></div>
+      <button class="btn btn-primary btn-small" id="btn-confirm-choice" disabled onclick="confirmStuffyChoice()">Get this stuffy! 🎉</button>
+    `;
+    const grid = document.getElementById('choice-grid');
+    earned.slice(0, 5).forEach(s => {
+      const btn = document.createElement('div');
+      btn.className = 'stuffy-choice-btn';
+      btn.dataset.id = s.id;
+      btn.innerHTML = `<div class="icon">${stuffyIcon(s)}</div><div class="lbl">${s.label}</div>`;
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.stuffy-choice-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        document.getElementById('btn-confirm-choice').disabled = false;
+        document.getElementById('btn-confirm-choice').dataset.chosen = s.id;
+      });
+      grid.appendChild(btn);
+    });
+  }
+}
+
+function confirmStuffyChoice() {
+  const id = document.getElementById('btn-confirm-choice').dataset.chosen;
+  if (id) state.unlockedStuffies.add(id);
+}
+
+// ════════════════════════════════════════════════════════════════════
+// SOUND
+// ════════════════════════════════════════════════════════════════════
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playSound(type) {
+  try {
+    const ctx = getAudioCtx();
+    if (type === 'correct') {
+      playTone(ctx, 523.25, 0.15, 'sine');
+      setTimeout(() => playTone(ctx, 659.25, 0.15, 'sine'), 120);
+      setTimeout(() => playTone(ctx, 783.99, 0.22, 'sine'), 240);
+    } else if (type === 'wrong') {
+      playTone(ctx, 220, 0.12, 'sawtooth');
+      setTimeout(() => playTone(ctx, 196, 0.18, 'sawtooth'), 120);
+    } else if (type === 'bell') {
+      // Bell: layered partials
+      [523.25, 1046.5, 1568, 2093].forEach((freq, i) => {
+        setTimeout(() => playTone(ctx, freq, 0.8 - i * 0.15, 'sine', 0.03 + i * 0.01), i * 40);
+      });
+    }
+  } catch(e) {}
+}
+
+function playTone(ctx, freq, duration, type, attackTime = 0.01) {
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.type = type;
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0, ctx.currentTime);
+  gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + attackTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + duration + 0.05);
+}
+
+// ════════════════════════════════════════════════════════════════════
+// STUFFY ANIMATION
+// ════════════════════════════════════════════════════════════════════
+function showStuffyAnim(type) {
+  const el = document.getElementById('stuffy-anim');
+  el.textContent = stuffyEmoji();
+  el.className = 'stuffy-anim';
+  el.style.display = 'block';
+  void el.offsetWidth; // reflow
+  el.classList.add(type);
+  setTimeout(() => { el.style.display = 'none'; }, 750);
+}
+
+// ════════════════════════════════════════════════════════════════════
+// CONFETTI
+// ════════════════════════════════════════════════════════════════════
+function launchConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const ctx = canvas.getContext('2d');
+  const pieces = [];
+  const colors = ['#ff6b6b','#ffdd57','#43e97b','#4facfe','#f093fb','#f5576c','#fff'];
+  for (let i = 0; i < 140; i++) {
+    pieces.push({
+      x: Math.random() * canvas.width,
+      y: -20 - Math.random() * 200,
+      r: 6 + Math.random() * 7,
+      d: 2 + Math.random() * 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      tilt: Math.random() * 10 - 10,
+      tiltSpeed: 0.1 + Math.random() * 0.15,
+      angle: 0,
+    });
+  }
+  let frame = 0;
+  const maxFrames = 160;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => {
+      p.angle += p.tiltSpeed;
+      p.y += p.d;
+      p.x += Math.sin(p.angle) * 1.5;
+      p.tilt = Math.sin(p.angle) * 12;
+      ctx.beginPath();
+      ctx.lineWidth = p.r / 2;
+      ctx.strokeStyle = p.color;
+      ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
+      ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r);
+      ctx.stroke();
+    });
+    frame++;
+    if (frame < maxFrames) requestAnimationFrame(draw);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  draw();
+}
+
+// ════════════════════════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════════════════════════
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// ════════════════════════════════════════════════════════════════════
+// RESIZE HANDLING
+// ════════════════════════════════════════════════════════════════════
+window.addEventListener('resize', () => {
+  if (canvas) {
+    resizeCanvas();
+    if (game.wall) {
+      computeRockPositions();
+      drawWall();
+    }
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  // Pre-init canvas ref
+  canvas = document.getElementById('wall-canvas');
+  ctx = canvas.getContext('2d');
+  canvas.addEventListener('click', onCanvasClick);
+  canvas.addEventListener('touchend', onCanvasTouchEnd, { passive: false });
+});
+</script>
+</body>
+</html>
