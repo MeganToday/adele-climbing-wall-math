@@ -23,13 +23,17 @@ html, body {
   width: 100%; height: 100%;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   position: absolute;
   top: 0; left: 0;
-  padding: 20px;
   overflow-y: auto;
 }
 .screen.active { display: flex; }
+.screen-centered {
+  justify-content: center;
+  padding: 24px;
+  gap: 18px;
+}
 
 /* ── BUTTONS ── */
 .btn {
@@ -45,12 +49,12 @@ html, body {
   white-space: nowrap;
 }
 .btn:active { transform: scale(0.94); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-.btn-adele  { background: linear-gradient(135deg,#f093fb,#764ba2); color:#fff; }
-.btn-nana   { background: linear-gradient(135deg,#f9ca24,#6ab04c); color:#fff; }
+.btn-adele   { background: linear-gradient(135deg,#f093fb,#764ba2); color:#fff; }
+.btn-nana    { background: linear-gradient(135deg,#f9ca24,#6ab04c); color:#fff; }
 .btn-primary { background: #ffdd57; color: #333; }
-.btn-secondary { background: rgba(255,255,255,0.2); color:#fff; border: 2px solid rgba(255,255,255,0.4); }
-.btn-danger  { background: #ff6b6b; color:#fff; }
-.btn-small { padding: 10px 22px; font-size: clamp(13px,2.2vw,19px); }
+.btn-secondary { background: rgba(255,255,255,0.18); color:#fff; border: 2px solid rgba(255,255,255,0.35); }
+.btn-small   { padding: 10px 20px; font-size: clamp(13px,2.2vw,18px); }
+.btn-warn    { background: #ff9f43; color: #fff; }
 
 /* ── WELCOME ── */
 #screen-welcome {
@@ -58,328 +62,243 @@ html, body {
   text-align: center;
   gap: 20px;
 }
+.welcome-emoji { font-size: clamp(60px,12vw,100px); animation: bounce 2s infinite; }
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
 .welcome-title {
-  font-size: clamp(30px,7vw,64px);
+  font-size: clamp(28px,7vw,62px);
   color: #fff;
   text-shadow: 3px 3px 8px rgba(0,0,0,0.5);
   line-height: 1.15;
 }
-.welcome-sub {
-  font-size: clamp(16px,3vw,26px);
-  color: rgba(255,255,255,0.75);
-}
-.welcome-emoji { font-size: clamp(60px,12vw,100px); animation: bounce 2s infinite; }
-@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+.welcome-sub { font-size: clamp(15px,3vw,24px); color: rgba(255,255,255,0.7); }
 .player-btns { display:flex; gap:20px; flex-wrap:wrap; justify-content:center; margin-top:8px; }
-.player-btn-wrap { display:flex; flex-direction:column; align-items:center; gap:8px; }
-.player-btn-wrap .btn { font-size: clamp(20px,4vw,34px); padding:22px 44px; }
+.player-btn-wrap .btn { font-size: clamp(20px,4vw,32px); padding:20px 44px; }
 
 /* ── SETUP ── */
-#screen-setup {
-  gap: 18px;
-  text-align: center;
-}
-.setup-header {
-  font-size: clamp(22px,5vw,42px);
-  font-weight: bold;
-  color: #fff;
-}
-.list-tabs {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
+#screen-setup { background: linear-gradient(135deg,#1a1a2e,#1a3a1a); }
+.setup-header { font-size: clamp(22px,5vw,40px); font-weight:bold; color:#fff; text-align:center; }
+.list-tabs { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
 .list-tab {
-  padding: 10px 20px;
-  border-radius: 30px;
+  padding: 10px 20px; border-radius: 30px;
   border: 2px solid rgba(255,255,255,0.3);
-  background: rgba(255,255,255,0.1);
-  color: #fff;
-  font-size: clamp(14px,2.2vw,19px);
-  font-weight: bold;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
+  background: rgba(255,255,255,0.1); color:#fff;
+  font-size: clamp(13px,2.2vw,18px); font-weight:bold;
+  cursor:pointer; -webkit-tap-highlight-color:transparent;
   transition: background 0.15s, border-color 0.15s;
 }
-.list-tab.active { border-color: #ffdd57; background: rgba(255,221,87,0.25); color:#ffdd57; }
-.list-tab:active { transform: scale(0.95); }
+.list-tab.active { border-color:#ffdd57; background:rgba(255,221,87,0.2); color:#ffdd57; }
+.list-tab:active { transform:scale(0.95); }
 .list-preview {
-  background: rgba(255,255,255,0.08);
-  border-radius: 16px;
-  padding: 14px 18px;
-  max-width: 500px;
-  width: 100%;
-  color: rgba(255,255,255,0.7);
-  font-size: clamp(12px,2vw,16px);
-  line-height: 1.6;
-  max-height: 120px;
-  overflow-y: auto;
+  background: rgba(255,255,255,0.08); border-radius:14px;
+  padding: 12px 16px; max-width:500px; width:100%;
+  color: rgba(255,255,255,0.65); font-size: clamp(12px,2vw,15px);
+  line-height:1.7; max-height:100px; overflow-y:auto; text-align:center;
 }
-.caller-question {
-  background: rgba(255,255,255,0.1);
-  border-radius: 16px;
-  padding: 16px 20px;
-  max-width: 460px;
-  width: 100%;
-}
-.caller-question p {
-  color:#fff; font-size: clamp(15px,2.5vw,21px); margin-bottom:12px;
-}
-.caller-btns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
 
-/* ── GAME ── */
-#screen-game {
-  padding: 0;
-  justify-content: flex-start;
-  overflow: hidden;
-}
-.game-top {
+/* ── GAME HEADER ── */
+.game-header {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
-  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(0,0,0,0.35);
   flex-shrink: 0;
+  gap: 8px;
+  flex-wrap: wrap;
 }
-.game-top .player-tag {
-  font-size: clamp(14px,2.5vw,22px);
-  font-weight: bold;
-  color: #fff;
-  white-space: nowrap;
-}
-.game-top-btns { display:flex; gap:8px; align-items:center; }
+.player-tag { font-size: clamp(15px,2.8vw,22px); font-weight:bold; color:#fff; white-space:nowrap; }
+.header-btns { display:flex; gap:7px; align-items:center; flex-wrap:wrap; }
 
-/* CARD */
-.card-area {
-  flex: 1;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 6px 10px 10px;
-  overflow: hidden;
+/* ── ADELE GAME ── */
+#screen-adele-game {
+  background: linear-gradient(135deg,#2d1b4e 0%,#1a1a2e 100%);
 }
-.bingo-header {
-  display: grid;
-  grid-template-columns: repeat(5,1fr);
-  width: 100%;
-  max-width: min(98vw, calc(100vh - 120px));
-  gap: 5px;
-  margin-bottom: 5px;
+.card-area {
+  flex:1; width:100%;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  padding: 6px 10px 12px;
+  overflow:hidden;
+}
+.bingo-header-row {
+  display:grid; grid-template-columns:repeat(5,1fr);
+  width:100%; max-width: min(96vw, calc(100vh - 130px));
+  gap:5px; margin-bottom:5px;
 }
 .bingo-header-cell {
-  text-align: center;
-  font-size: clamp(18px,4vw,34px);
-  font-weight: 900;
-  color: #fff;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
-  letter-spacing: 2px;
+  text-align:center;
+  font-size: clamp(18px,4vw,34px); font-weight:900;
+  color:#fff; text-shadow:2px 2px 4px rgba(0,0,0,0.4);
 }
 .bingo-grid {
-  display: grid;
-  grid-template-columns: repeat(5,1fr);
-  gap: 5px;
-  width: 100%;
-  max-width: min(98vw, calc(100vh - 120px));
+  display:grid; grid-template-columns:repeat(5,1fr);
+  gap:5px; width:100%;
+  max-width: min(96vw, calc(100vh - 130px));
 }
 .bingo-cell {
-  aspect-ratio: 1;
-  border-radius: 12px;
-  border: 3px solid rgba(255,255,255,0.25);
-  background: rgba(255,255,255,0.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: clamp(11px, 2.8vw, 22px);
-  font-weight: bold;
-  color: #fff;
-  text-align: center;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform 0.1s, background 0.2s, border-color 0.2s;
-  padding: 3px;
-  line-height: 1.1;
-  word-break: break-word;
-  user-select: none;
+  aspect-ratio:1; border-radius:12px;
+  border:3px solid rgba(255,255,255,0.22);
+  background:rgba(255,255,255,0.1);
+  display:flex; align-items:center; justify-content:center;
+  font-size: clamp(11px,2.6vw,20px); font-weight:bold;
+  color:#fff; text-align:center; cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform 0.1s, background 0.2s, border-color 0.2s;
+  padding:3px; line-height:1.15;
+  word-break:break-word; user-select:none;
 }
-.bingo-cell:active { transform: scale(0.91); }
+.bingo-cell:active { transform:scale(0.9); }
 .bingo-cell.marked-adele {
   background: linear-gradient(135deg,#f093fb88,#764ba2cc);
-  border-color: #f093fb;
-  box-shadow: 0 0 10px #f093fb88;
+  border-color:#f093fb; box-shadow:0 0 10px #f093fb66;
 }
 .bingo-cell.marked-nana {
   background: linear-gradient(135deg,#f9ca2488,#6ab04ccc);
-  border-color: #f9ca24;
-  box-shadow: 0 0 10px #f9ca2488;
+  border-color:#f9ca24; box-shadow:0 0 10px #f9ca2466;
 }
-.bingo-cell.free {
-  background: rgba(255,255,255,0.25);
-  border-color: rgba(255,255,255,0.5);
-  cursor: default;
-}
-.bingo-cell.win-cell {
-  animation: winPulse 0.7s ease infinite alternate;
-}
+.bingo-cell.free { background:rgba(255,255,255,0.22); border-color:rgba(255,255,255,0.45); cursor:default; }
+.bingo-cell.readonly { cursor:default; }
+.bingo-cell.readonly:active { transform:none; }
+.bingo-cell.win-cell { animation:winPulse 0.7s ease infinite alternate; }
 @keyframes winPulse {
-  from { box-shadow: 0 0 8px #ffdd57; border-color:#ffdd57; }
-  to   { box-shadow: 0 0 22px #ffdd57, 0 0 40px #ffdd57; border-color:#fff; }
+  from { box-shadow:0 0 8px #ffdd57; border-color:#ffdd57; }
+  to   { box-shadow:0 0 22px #ffdd57,0 0 40px #ffdd57; border-color:#fff; }
 }
 
-/* CALLER VIEW */
-.caller-view {
-  flex: 1;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px 16px 16px;
-  overflow-y: auto;
-  gap: 12px;
+/* ── NANA GAME ── */
+#screen-nana-game {
+  background: linear-gradient(135deg,#1a3a1a 0%,#1a1a2e 100%);
 }
+.nana-body {
+  flex:1; width:100%;
+  display:flex; flex-direction:column;
+  align-items:center;
+  padding: 8px 12px 14px;
+  gap:10px;
+  overflow-y:auto;
+}
+
+/* Current word display */
 .current-word-box {
-  background: rgba(255,255,255,0.12);
-  border-radius: 24px;
-  padding: 20px 32px;
-  text-align: center;
-  width: 100%;
-  max-width: 500px;
+  background: rgba(255,255,255,0.1); border-radius:20px;
+  padding:14px 24px; text-align:center; width:100%; max-width:480px;
+  flex-shrink:0;
 }
 .current-word {
-  font-size: clamp(48px,12vw,96px);
-  font-weight: 900;
-  color: #fff;
-  text-shadow: 3px 3px 8px rgba(0,0,0,0.4);
-  min-height: 80px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  letter-spacing: 2px;
+  font-size: clamp(44px,11vw,88px); font-weight:900;
+  color:#fff; text-shadow:3px 3px 8px rgba(0,0,0,0.4);
+  min-height:70px; display:flex; align-items:center; justify-content:center;
+  letter-spacing:3px;
 }
-.current-word.pop {
-  animation: wordPop 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
-}
+.current-word.pop { animation:wordPop 0.4s cubic-bezier(0.175,0.885,0.32,1.275); }
 @keyframes wordPop {
-  0%   { transform: scale(0.5); opacity:0; }
-  70%  { transform: scale(1.1); }
-  100% { transform: scale(1); opacity:1; }
+  0%  { transform:scale(0.5); opacity:0; }
+  70% { transform:scale(1.08); }
+  100%{ transform:scale(1); opacity:1; }
 }
-.word-count {
-  font-size: clamp(13px,2vw,18px);
-  color: rgba(255,255,255,0.6);
-  margin-top: 6px;
-}
-.called-list-label {
-  font-size: clamp(13px,2vw,18px);
-  color: rgba(255,255,255,0.7);
-  font-weight: bold;
-  align-self: flex-start;
-  max-width: 500px;
-  width:100%;
-}
-.called-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  width: 100%;
-  max-width: 500px;
-  max-height: 140px;
-  overflow-y: auto;
-}
-.called-chip {
-  background: rgba(255,255,255,0.15);
-  color: #fff;
-  border-radius: 20px;
-  padding: 5px 14px;
-  font-size: clamp(13px,2vw,17px);
-  font-weight: bold;
-}
-.called-chip.newest {
-  background: #ffdd57;
-  color: #333;
+.word-count { font-size:clamp(12px,1.8vw,16px); color:rgba(255,255,255,0.55); margin-top:4px; }
+
+/* Draw button */
+.draw-btn-wrap { width:100%; max-width:480px; flex-shrink:0; }
+.btn-draw {
+  width:100%; padding:18px;
+  font-size: clamp(20px,4.5vw,34px);
+  border-radius:20px;
+  background: linear-gradient(135deg,#f9ca24,#6ab04c);
+  color:#fff; font-weight:900;
+  box-shadow:0 6px 24px rgba(249,202,36,0.4);
 }
 
-/* CALLED WORDS OVERLAY */
+/* Look-again warning */
+.look-again-box {
+  display:none;
+  background: rgba(255,100,50,0.25);
+  border: 2px solid #ff6b35;
+  border-radius:16px;
+  padding:12px 20px;
+  color:#fff;
+  font-size: clamp(15px,2.8vw,22px);
+  font-weight:bold;
+  text-align:center;
+  width:100%; max-width:480px;
+  animation: fadeIn 0.3s ease;
+}
+.look-again-box.visible { display:block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+
+/* Nana's own card (compact) */
+.nana-card-label {
+  font-size:clamp(13px,2vw,17px); color:rgba(255,255,255,0.6);
+  font-weight:bold; align-self:flex-start; width:100%; max-width:480px;
+}
+.nana-card-wrap {
+  width:100%; max-width:480px;
+}
+.nana-bingo-header {
+  display:grid; grid-template-columns:repeat(5,1fr);
+  gap:4px; margin-bottom:4px;
+}
+.nana-bingo-header .bingo-header-cell { font-size:clamp(14px,3vw,26px); }
+.nana-grid {
+  display:grid; grid-template-columns:repeat(5,1fr); gap:4px;
+}
+.nana-grid .bingo-cell { font-size:clamp(9px,2vw,15px); border-radius:8px; border-width:2px; }
+
+/* Called chips row */
+.called-row-label { font-size:clamp(12px,2vw,16px); color:rgba(255,255,255,0.6); font-weight:bold; align-self:flex-start; width:100%; max-width:480px; }
+.called-chips-row {
+  display:flex; flex-wrap:wrap; gap:6px;
+  width:100%; max-width:480px;
+  max-height:80px; overflow-y:auto;
+}
+.called-chip {
+  background:rgba(255,255,255,0.14); color:#fff;
+  border-radius:20px; padding:4px 12px;
+  font-size:clamp(12px,1.8vw,16px); font-weight:bold;
+}
+.called-chip.newest { background:#ffdd57; color:#333; }
+
+/* ── OVERLAYS ── */
 .overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-  z-index: 80;
-  align-items: center;
-  justify-content: center;
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,0.72); z-index:80;
+  align-items:center; justify-content:center;
 }
 .overlay.active { display:flex; }
 .overlay-box {
-  background: #1e1e3a;
-  border-radius: 24px;
-  padding: 24px;
-  width: min(480px,92vw);
-  max-height: 80vh;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+  background:#1e1e3a; border-radius:24px; padding:22px;
+  width:min(500px,94vw); max-height:88vh;
+  display:flex; flex-direction:column; gap:12px;
 }
-.overlay-title {
-  font-size: clamp(18px,3.5vw,28px);
-  color:#fff;
-  font-weight:bold;
-  text-align:center;
-}
-.overlay-words {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  overflow-y: auto;
-  flex: 1;
-}
+.overlay-title { font-size:clamp(17px,3.5vw,26px); color:#fff; font-weight:bold; text-align:center; }
+.overlay-words { display:flex; flex-wrap:wrap; gap:7px; overflow-y:auto; flex:1; }
 
-/* WIN OVERLAY */
+/* Adele's board peek overlay */
+#adele-peek-overlay .overlay-box { max-width:420px; }
+.peek-label { font-size:clamp(12px,2vw,16px); color:rgba(255,255,255,0.55); text-align:center; }
+
+/* ── WIN ── */
 #win-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.65);
-  z-index: 150;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  text-align: center;
-  padding: 24px;
-  gap: 20px;
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,0.65); z-index:150;
+  align-items:center; justify-content:center;
+  flex-direction:column; text-align:center; padding:24px; gap:20px;
 }
 #win-overlay.active { display:flex; }
 .win-title {
-  font-size: clamp(52px,14vw,110px);
-  font-weight:900;
-  color:#ffdd57;
-  text-shadow: 4px 4px 12px rgba(0,0,0,0.5);
-  animation: winPop 0.6s cubic-bezier(0.175,0.885,0.32,1.275);
+  font-size:clamp(52px,14vw,108px); font-weight:900; color:#ffdd57;
+  text-shadow:4px 4px 12px rgba(0,0,0,0.5);
+  animation:winPop 0.6s cubic-bezier(0.175,0.885,0.32,1.275);
 }
-@keyframes winPop {
-  0% { transform:scale(0); opacity:0; }
-  70%{ transform:scale(1.15); }
-  100%{ transform:scale(1); opacity:1; }
-}
-.win-sub {
-  font-size: clamp(22px,5vw,42px);
-  color:#fff;
-  text-shadow: 2px 2px 6px rgba(0,0,0,0.4);
-}
+@keyframes winPop { 0%{transform:scale(0);opacity:0} 70%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1} }
+.win-sub { font-size:clamp(20px,5vw,40px); color:#fff; text-shadow:2px 2px 6px rgba(0,0,0,0.4); }
 
-/* CONFETTI */
+/* ── CONFETTI ── */
 #confetti-canvas {
-  position: fixed;
-  top:0; left:0;
-  width:100vw; height:100vh;
-  pointer-events:none;
-  z-index:200;
+  position:fixed; top:0; left:0; width:100vw; height:100vh;
+  pointer-events:none; z-index:200;
 }
-
-/* SCROLLBAR */
 ::-webkit-scrollbar { width:5px; height:5px; }
 ::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.25); border-radius:3px; }
 </style>
@@ -387,8 +306,8 @@ html, body {
 <body>
 <div id="app">
 
-  <!-- ══ WELCOME ══════════════════════════════════════════════ -->
-  <div id="screen-welcome" class="screen active">
+  <!-- ══ WELCOME ══════════════════════════════════════════════════ -->
+  <div id="screen-welcome" class="screen screen-centered" style="background:linear-gradient(135deg,#1a1a2e,#2d1b4e)">
     <div class="welcome-emoji">🎴</div>
     <div class="welcome-title">Adele & Nana's<br><span style="color:#f9ca24">Bingo!</span> 🎉</div>
     <div class="welcome-sub">A sight word game for two</div>
@@ -402,72 +321,116 @@ html, body {
     </div>
   </div>
 
-  <!-- ══ SETUP ════════════════════════════════════════════════ -->
-  <div id="screen-setup" class="screen">
-    <div class="setup-header" id="setup-header">Adele's Setup 🌸</div>
-    <div style="color:rgba(255,255,255,0.7);font-size:clamp(14px,2.2vw,19px)">Choose a word list:</div>
+  <!-- ══ SETUP ════════════════════════════════════════════════════ -->
+  <div id="screen-setup" class="screen screen-centered">
+    <div class="setup-header" id="setup-header">Setup 🌸</div>
+    <div style="color:rgba(255,255,255,0.7);font-size:clamp(14px,2.2vw,18px)">Choose a word list:</div>
     <div class="list-tabs" id="list-tabs"></div>
     <div class="list-preview" id="list-preview"></div>
-    <div class="caller-question">
-      <p>Who is calling the words this round?</p>
-      <div class="caller-btns">
-        <button class="btn btn-primary btn-small" onclick="setCaller(true)">I am! 📣</button>
-        <button class="btn btn-secondary btn-small" onclick="setCaller(false)">The other player is</button>
-      </div>
-    </div>
-    <button class="btn btn-primary" onclick="startGame()" style="margin-top:4px">Make My Card! 🎴</button>
-    <button class="btn btn-secondary btn-small" onclick="showScreen('welcome')" style="margin-top:8px">← Back</button>
+    <button class="btn btn-primary" onclick="startGame()">Make My Card! 🎴</button>
+    <button class="btn btn-secondary btn-small" onclick="showScreen('welcome')">← Back</button>
   </div>
 
-  <!-- ══ GAME ═════════════════════════════════════════════════ -->
-  <div id="screen-game" class="screen">
-    <div class="game-top" id="game-top">
-      <span class="player-tag" id="game-player-tag">🌸 Adele</span>
-      <div class="game-top-btns">
-        <button class="btn btn-small" id="btn-toggle-view" onclick="toggleView()" style="display:none">📣 Caller View</button>
-        <button class="btn btn-secondary btn-small" onclick="showCalledOverlay()">📋 Words</button>
+  <!-- ══ ADELE GAME ════════════════════════════════════════════════ -->
+  <div id="screen-adele-game" class="screen">
+    <div class="game-header">
+      <span class="player-tag">🌸 Adele</span>
+      <div class="header-btns">
+        <button class="btn btn-secondary btn-small" onclick="showCalledOverlay()">Words Called</button>
         <button class="btn btn-secondary btn-small" onclick="newGame()">🔄 New</button>
         <button class="btn btn-secondary btn-small" onclick="showScreen('welcome')">🏠</button>
       </div>
     </div>
-
-    <!-- Caller view -->
-    <div class="caller-view" id="caller-view" style="display:none">
-      <div class="current-word-box">
-        <div class="current-word" id="current-word">—</div>
-        <div class="word-count" id="word-count">0 words called</div>
-      </div>
-      <button class="btn btn-primary" id="btn-draw" onclick="drawWord()" style="font-size:clamp(20px,4vw,32px);padding:20px 48px">
-        Draw a Word! 🎲
-      </button>
-      <div class="called-list-label">Called so far:</div>
-      <div class="called-list" id="called-list"></div>
-      <button class="btn btn-secondary btn-small" onclick="toggleView()">🎴 Show My Card</button>
-    </div>
-
-    <!-- Card view -->
-    <div class="card-area" id="card-area">
-      <div class="bingo-header">
+    <div class="card-area">
+      <div class="bingo-header-row">
         <div class="bingo-header-cell">B</div>
         <div class="bingo-header-cell">I</div>
         <div class="bingo-header-cell">N</div>
         <div class="bingo-header-cell">G</div>
         <div class="bingo-header-cell">O</div>
       </div>
-      <div class="bingo-grid" id="bingo-grid"></div>
+      <div class="bingo-grid" id="adele-grid"></div>
     </div>
   </div>
 
-  <!-- ══ CALLED WORDS OVERLAY ═════════════════════════════════ -->
+  <!-- ══ NANA GAME ════════════════════════════════════════════════ -->
+  <div id="screen-nana-game" class="screen">
+    <div class="game-header">
+      <span class="player-tag">🌻 Nana — Caller</span>
+      <div class="header-btns">
+        <button class="btn btn-secondary btn-small" onclick="showCalledOverlay()">Words Called</button>
+        <button class="btn btn-secondary btn-small" onclick="showAdelePeek()">👧 Adele's Card</button>
+        <button class="btn btn-secondary btn-small" onclick="newGame()">🔄 New</button>
+        <button class="btn btn-secondary btn-small" onclick="showScreen('welcome')">🏠</button>
+      </div>
+    </div>
+    <div class="nana-body">
+
+      <!-- Current word -->
+      <div class="current-word-box">
+        <div class="current-word" id="current-word">—</div>
+        <div class="word-count" id="word-count">0 words called</div>
+      </div>
+
+      <!-- Look again warning -->
+      <div class="look-again-box" id="look-again-box">
+        👀 Look again, Adele! Find "<span id="look-again-word"></span>" on your card!
+      </div>
+
+      <!-- Draw button -->
+      <div class="draw-btn-wrap">
+        <button class="btn btn-draw" id="btn-draw" onclick="drawWord()">Draw a Word! 🎲</button>
+      </div>
+
+      <!-- Called chips -->
+      <div class="called-row-label">Called so far:</div>
+      <div class="called-chips-row" id="nana-called-chips"></div>
+
+      <!-- Nana's own card -->
+      <div class="nana-card-label">Your card — tap to mark:</div>
+      <div class="nana-card-wrap">
+        <div class="nana-bingo-header">
+          <div class="bingo-header-cell">B</div>
+          <div class="bingo-header-cell">I</div>
+          <div class="bingo-header-cell">N</div>
+          <div class="bingo-header-cell">G</div>
+          <div class="bingo-header-cell">O</div>
+        </div>
+        <div class="nana-grid" id="nana-grid"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ CALLED WORDS OVERLAY ═════════════════════════════════════ -->
   <div class="overlay" id="called-overlay">
     <div class="overlay-box">
       <div class="overlay-title">📋 Words Called</div>
       <div class="overlay-words" id="overlay-words"></div>
-      <button class="btn btn-secondary btn-small" onclick="hideCalledOverlay()" style="align-self:center">Close</button>
+      <button class="btn btn-secondary btn-small" onclick="hideOverlay('called-overlay')" style="align-self:center">Close</button>
     </div>
   </div>
 
-  <!-- ══ WIN OVERLAY ══════════════════════════════════════════ -->
+  <!-- ══ ADELE'S CARD PEEK (Nana only) ════════════════════════════ -->
+  <div class="overlay" id="adele-peek-overlay">
+    <div class="overlay-box">
+      <div class="overlay-title">👧 Adele's Card <span style="font-size:0.6em;opacity:0.6">(read only)</span></div>
+      <div class="peek-label">Adele marks her own card on her device</div>
+      <div style="margin-top:4px">
+        <div class="bingo-header-row" style="max-width:100%;margin-bottom:4px">
+          <div class="bingo-header-cell">B</div>
+          <div class="bingo-header-cell">I</div>
+          <div class="bingo-header-cell">N</div>
+          <div class="bingo-header-cell">G</div>
+          <div class="bingo-header-cell">O</div>
+        </div>
+        <div class="bingo-grid" id="peek-grid"></div>
+      </div>
+      <button class="btn btn-secondary btn-small" onclick="hideOverlay('adele-peek-overlay')" style="align-self:center">Close</button>
+    </div>
+  </div>
+
+  <!-- ══ WIN OVERLAY ══════════════════════════════════════════════ -->
   <div id="win-overlay">
     <div class="win-title">🎉 BINGO! 🎉</div>
     <div class="win-sub" id="win-sub">Adele wins this round!</div>
@@ -481,9 +444,9 @@ html, body {
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 // WORD LISTS — add or edit lists here
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 const WORD_LISTS = [
   {
     name: 'List 1 — Easiest',
@@ -510,47 +473,55 @@ const WORD_LISTS = [
   },
 ];
 
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 // STATE
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 const gs = {
   player: 'adele',      // 'adele' | 'nana'
-  isCaller: false,
   listIdx: 0,
-  card: [],             // 5x5 array of words, '' for FREE
-  marked: [],           // 5x5 booleans
-  calledWords: [],      // drawn words in order
-  remainingWords: [],   // pool not yet drawn
-  showingCallerView: false,
-  won: false,
+
+  // Adele's card (generated on Nana's device too, using same seed logic — honor system)
+  adeleCard: [],        // 5x5
+  adeleMarked: [],      // 5x5 — Nana's view of what Adele has marked (honor system)
+  adeleWon: false,
+
+  // Nana's card
+  nanaCard: [],
+  nanaMarked: [],
+  nanaWon: false,
+
+  // Shared caller state (always Nana)
+  calledWords: [],
+  remainingWords: [],
+  lastCalledWord: null,
+  lookAgainActive: false,
 };
 
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 // SCREEN NAV
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');
 }
 
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 // WELCOME
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 function choosePlayer(player) {
   gs.player = player;
   renderSetup();
   showScreen('setup');
 }
 
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 // SETUP
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 function renderSetup() {
   const isAdele = gs.player === 'adele';
   document.getElementById('setup-header').textContent =
     isAdele ? "Adele's Setup 🌸" : "Nana's Setup 🌻";
 
-  // List tabs
   const tabs = document.getElementById('list-tabs');
   tabs.innerHTML = '';
   WORD_LISTS.forEach((list, i) => {
@@ -560,43 +531,38 @@ function renderSetup() {
     tab.onclick = () => { gs.listIdx = i; renderSetup(); };
     tabs.appendChild(tab);
   });
-
-  // Preview
   document.getElementById('list-preview').textContent =
     WORD_LISTS[gs.listIdx].words.join(', ');
 }
 
-function setCaller(val) {
-  gs.isCaller = val;
-}
-
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 // GAME START
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 function startGame() {
-  generateCard();
   gs.calledWords = [];
   gs.remainingWords = shuffle([...WORD_LISTS[gs.listIdx].words]);
-  gs.won = false;
-  gs.showingCallerView = gs.isCaller;
+  gs.lastCalledWord = null;
+  gs.lookAgainActive = false;
+  gs.adeleWon = false;
+  gs.nanaWon = false;
 
-  // Style game screen per player
-  const isAdele = gs.player === 'adele';
-  const gameScreen = document.getElementById('screen-game');
-  gameScreen.style.background = isAdele
-    ? 'linear-gradient(135deg,#2d1b4e 0%,#1a1a2e 100%)'
-    : 'linear-gradient(135deg,#1a3a1a 0%,#1a1a2e 100%)';
+  // Always generate both cards (Nana's device holds both so she can peek)
+  gs.adeleCard = generateCard();
+  gs.adeleMarked = makeMarkedGrid();
+  gs.nanaCard = generateCard();
+  gs.nanaMarked = makeMarkedGrid();
 
-  document.getElementById('game-player-tag').textContent =
-    isAdele ? '🌸 Adele' : '🌻 Nana';
-
-  const toggleBtn = document.getElementById('btn-toggle-view');
-  toggleBtn.style.display = gs.isCaller ? 'inline-block' : 'none';
-
-  renderCard();
-  updateCallerView();
-  applyView();
-  showScreen('game');
+  if (gs.player === 'adele') {
+    renderAdeleCard();
+    showScreen('adele-game');
+  } else {
+    renderNanaCard();
+    renderNanaCalledChips();
+    hideLookAgain();
+    document.getElementById('current-word').textContent = '—';
+    document.getElementById('word-count').textContent = '0 words called';
+    showScreen('nana-game');
+  }
 }
 
 function newGame() {
@@ -604,80 +570,106 @@ function newGame() {
   startGame();
 }
 
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 // CARD GENERATION
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 function generateCard() {
   const words = shuffle([...WORD_LISTS[gs.listIdx].words]).slice(0, 24);
-  gs.card = [];
-  gs.marked = [];
+  const card = [];
   let wi = 0;
   for (let r = 0; r < 5; r++) {
-    gs.card.push([]);
-    gs.marked.push([]);
+    card.push([]);
     for (let c = 0; c < 5; c++) {
-      if (r === 2 && c === 2) {
-        gs.card[r].push('FREE');
-        gs.marked[r].push(true);
-      } else {
-        gs.card[r].push(words[wi++]);
-        gs.marked[r].push(false);
-      }
+      card[r].push(r === 2 && c === 2 ? 'FREE' : words[wi++]);
     }
   }
+  return card;
 }
 
-function renderCard() {
-  const grid = document.getElementById('bingo-grid');
+function makeMarkedGrid() {
+  return Array.from({length:5}, (_, r) =>
+    Array.from({length:5}, (__, c) => r === 2 && c === 2));
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RENDER ADELE'S CARD
+// ═══════════════════════════════════════════════════════════════════
+function renderAdeleCard(gridId = 'adele-grid', card = gs.adeleCard, marked = gs.adeleMarked, readonly = false) {
+  const grid = document.getElementById(gridId);
   grid.innerHTML = '';
-  const markedClass = gs.player === 'adele' ? 'marked-adele' : 'marked-nana';
   for (let r = 0; r < 5; r++) {
     for (let c = 0; c < 5; c++) {
-      const cell = document.createElement('div');
       const isFree = r === 2 && c === 2;
-      cell.className = 'bingo-cell' +
-        (gs.marked[r][c] ? ' ' + (isFree ? 'free ' : '') + markedClass : '') +
-        (isFree ? ' free' : '');
-      cell.textContent = isFree ? '⭐ FREE' : gs.card[r][c];
-      if (!isFree) {
+      const cell = document.createElement('div');
+      let cls = 'bingo-cell';
+      if (isFree)         cls += ' free';
+      if (marked[r][c])   cls += ' marked-adele';
+      if (readonly)       cls += ' readonly';
+      cell.className = cls;
+      cell.textContent = isFree ? '⭐ FREE' : card[r][c];
+      if (!isFree && !readonly) {
         const row = r, col = c;
-        cell.addEventListener('click', () => toggleCell(row, col));
+        cell.addEventListener('click', () => toggleAdeleCell(row, col));
       }
       grid.appendChild(cell);
     }
   }
 }
 
-function toggleCell(r, c) {
-  if (gs.won) return;
-  gs.marked[r][c] = !gs.marked[r][c];
-  renderCard();
-  if (checkBingo()) triggerWin();
+function toggleAdeleCell(r, c) {
+  if (gs.adeleWon) return;
+  gs.adeleMarked[r][c] = !gs.adeleMarked[r][c];
+  renderAdeleCard();
+  if (checkBingo(gs.adeleMarked, 'adele-grid')) triggerWin('Adele');
 }
 
-// ═══════════════════════════════════════════════════════════════
-// BINGO CHECK
-// ═══════════════════════════════════════════════════════════════
-function checkBingo() {
-  const m = gs.marked;
-  // rows
+// ═══════════════════════════════════════════════════════════════════
+// RENDER NANA'S CARD
+// ═══════════════════════════════════════════════════════════════════
+function renderNanaCard() {
+  const grid = document.getElementById('nana-grid');
+  grid.innerHTML = '';
   for (let r = 0; r < 5; r++) {
-    if (m[r].every(v => v)) return winLine(r, null, null);
+    for (let c = 0; c < 5; c++) {
+      const isFree = r === 2 && c === 2;
+      const cell = document.createElement('div');
+      let cls = 'bingo-cell';
+      if (isFree)                cls += ' free';
+      if (gs.nanaMarked[r][c])   cls += ' marked-nana';
+      cell.className = cls;
+      cell.textContent = isFree ? '⭐ FREE' : gs.nanaCard[r][c];
+      if (!isFree) {
+        const row = r, col = c;
+        cell.addEventListener('click', () => toggleNanaCell(row, col));
+      }
+      grid.appendChild(cell);
+    }
   }
-  // cols
-  for (let c = 0; c < 5; c++) {
-    if (m.every(row => row[c])) return winLine(null, c, null);
-  }
-  // diag top-left to bottom-right
-  if ([0,1,2,3,4].every(i => m[i][i])) return winLine(null, null, 'tlbr');
-  // diag top-right to bottom-left
-  if ([0,1,2,3,4].every(i => m[i][4-i])) return winLine(null, null, 'trbl');
+}
+
+function toggleNanaCell(r, c) {
+  if (gs.nanaWon) return;
+  gs.nanaMarked[r][c] = !gs.nanaMarked[r][c];
+  renderNanaCard();
+  if (checkBingo(gs.nanaMarked, 'nana-grid')) triggerWin('Nana');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// BINGO CHECK
+// ═══════════════════════════════════════════════════════════════════
+function checkBingo(marked, gridId) {
+  const m = marked;
+  for (let r = 0; r < 5; r++)
+    if (m[r].every(v => v)) return winLine(gridId, r, null, null);
+  for (let c = 0; c < 5; c++)
+    if (m.every(row => row[c])) return winLine(gridId, null, c, null);
+  if ([0,1,2,3,4].every(i => m[i][i]))   return winLine(gridId, null, null, 'tlbr');
+  if ([0,1,2,3,4].every(i => m[i][4-i])) return winLine(gridId, null, null, 'trbl');
   return false;
 }
 
-function winLine(row, col, diag) {
-  // Highlight winning cells
-  const cells = document.querySelectorAll('.bingo-cell');
+function winLine(gridId, row, col, diag) {
+  const cells = document.getElementById(gridId).querySelectorAll('.bingo-cell');
   const coords = [];
   if (row !== null) for (let c=0;c<5;c++) coords.push(row*5+c);
   if (col !== null) for (let r=0;r<5;r++) coords.push(r*5+col);
@@ -687,30 +679,52 @@ function winLine(row, col, diag) {
   return true;
 }
 
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 // WIN
-// ═══════════════════════════════════════════════════════════════
-function triggerWin() {
-  gs.won = true;
+// ═══════════════════════════════════════════════════════════════════
+function triggerWin(name) {
+  if (name === 'Adele') gs.adeleWon = true;
+  else gs.nanaWon = true;
   playSound('bell');
   launchConfetti();
-  const name = gs.player === 'adele' ? 'Adele' : 'Nana';
   document.getElementById('win-sub').textContent = `${name} wins this round! 🎊`;
   setTimeout(() => document.getElementById('win-overlay').classList.add('active'), 600);
 }
 
-// ═══════════════════════════════════════════════════════════════
-// CALLER
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
+// CALLER — DRAW WORD
+// ═══════════════════════════════════════════════════════════════════
 function drawWord() {
+  // Check: does Adele still need to mark the last called word?
+  if (gs.lastCalledWord && !gs.nanaWon && !gs.adeleWon) {
+    const word = gs.lastCalledWord;
+    // Find if word is on Adele's card and not yet marked on Nana's copy
+    let adeleHasIt = false, adeleMarkedIt = false;
+    for (let r = 0; r < 5; r++) {
+      for (let c = 0; c < 5; c++) {
+        if (gs.adeleCard[r][c] === word) {
+          adeleHasIt = true;
+          if (gs.adeleMarked[r][c]) adeleMarkedIt = true;
+        }
+      }
+    }
+    if (adeleHasIt && !adeleMarkedIt) {
+      showLookAgain(word);
+      return;
+    }
+  }
+
   if (gs.remainingWords.length === 0) {
     document.getElementById('current-word').textContent = '🎉 All done!';
     return;
   }
+
+  hideLookAgain();
   const word = gs.remainingWords.pop();
   gs.calledWords.unshift(word);
+  gs.lastCalledWord = word;
   playSound('ding');
-  // Display
+
   const el = document.getElementById('current-word');
   el.textContent = word;
   el.classList.remove('pop');
@@ -718,39 +732,38 @@ function drawWord() {
   el.classList.add('pop');
   document.getElementById('word-count').textContent =
     `${gs.calledWords.length} word${gs.calledWords.length === 1 ? '' : 's'} called`;
-  updateCallerView();
+
+  renderNanaCalledChips();
   speakWord(word);
 }
 
-function speakWord(word) {
-  if (!window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  const say = (text) => {
-    const utt = new SpeechSynthesisUtterance(text);
-    utt.rate = 0.85;
-    utt.pitch = 1.1;
-    // Prefer a female English voice
-    const voices = window.speechSynthesis.getVoices();
-    const preferred = voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('female'))
-      || voices.find(v => v.lang.startsWith('en') && /samantha|karen|victoria|moira|tessa|fiona/i.test(v.name))
-      || voices.find(v => v.lang.startsWith('en'));
-    if (preferred) utt.voice = preferred;
-    window.speechSynthesis.speak(utt);
-  };
-  say(word);
-  setTimeout(() => say(word), 1200);
+function showLookAgain(word) {
+  gs.lookAgainActive = true;
+  document.getElementById('look-again-word').textContent = word;
+  const box = document.getElementById('look-again-box');
+  box.classList.remove('visible');
+  void box.offsetWidth;
+  box.classList.add('visible');
 }
 
-function updateCallerView() {
-  const list = document.getElementById('called-list');
-  list.innerHTML = '';
+function hideLookAgain() {
+  gs.lookAgainActive = false;
+  document.getElementById('look-again-box').classList.remove('visible');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CALLED CHIPS
+// ═══════════════════════════════════════════════════════════════════
+function renderNanaCalledChips() {
+  const row = document.getElementById('nana-called-chips');
+  row.innerHTML = '';
   gs.calledWords.forEach((w, i) => {
     const chip = document.createElement('span');
     chip.className = 'called-chip' + (i === 0 ? ' newest' : '');
     chip.textContent = w;
-    list.appendChild(chip);
+    row.appendChild(chip);
   });
-  // overlay
+  // also update overlay
   const ow = document.getElementById('overlay-words');
   ow.innerHTML = '';
   gs.calledWords.forEach((w, i) => {
@@ -761,117 +774,117 @@ function updateCallerView() {
   });
 }
 
-function toggleView() {
-  gs.showingCallerView = !gs.showingCallerView;
-  applyView();
+// ═══════════════════════════════════════════════════════════════════
+// ADELE PEEK (Nana sees Adele's card read-only)
+// Note: on Nana's device, adeleMarked tracks what Nana has seen Adele
+// confirm. Nana cannot mark it herself — it's purely for the
+// "Look again" check and visual reference.
+// ═══════════════════════════════════════════════════════════════════
+function showAdelePeek() {
+  renderAdeleCard('peek-grid', gs.adeleCard, gs.adeleMarked, true);
+  document.getElementById('adele-peek-overlay').classList.add('active');
 }
 
-function applyView() {
-  const callerView = document.getElementById('caller-view');
-  const cardArea = document.getElementById('card-area');
-  const toggleBtn = document.getElementById('btn-toggle-view');
-  if (gs.showingCallerView) {
-    callerView.style.display = 'flex';
-    cardArea.style.display = 'none';
-    toggleBtn.textContent = '🎴 My Card';
-  } else {
-    callerView.style.display = 'none';
-    cardArea.style.display = 'flex';
-    toggleBtn.textContent = '📣 Caller View';
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// CALLED WORDS OVERLAY
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
+// OVERLAYS
+// ═══════════════════════════════════════════════════════════════════
 function showCalledOverlay() {
-  updateCallerView();
+  renderNanaCalledChips();
   document.getElementById('called-overlay').classList.add('active');
 }
-function hideCalledOverlay() {
-  document.getElementById('called-overlay').classList.remove('active');
+function hideOverlay(id) {
+  document.getElementById(id).classList.remove('active');
 }
 
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
+// SPEECH
+// ═══════════════════════════════════════════════════════════════════
+function speakWord(word) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const say = () => {
+    const utt = new SpeechSynthesisUtterance(word);
+    utt.rate = 0.85; utt.pitch = 1.1;
+    const voices = window.speechSynthesis.getVoices();
+    const v = voices.find(v => v.lang.startsWith('en') && /samantha|karen|victoria|moira|tessa|fiona/i.test(v.name))
+           || voices.find(v => v.lang.startsWith('en'));
+    if (v) utt.voice = v;
+    window.speechSynthesis.speak(utt);
+  };
+  say();
+  setTimeout(say, 1300);
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // SOUND
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 let audioCtx = null;
 function getAudio() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   return audioCtx;
 }
-function playTone(ctx, freq, duration, type = 'sine', attack = 0.01) {
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
+function playTone(ctx, freq, dur, type='sine', attack=0.01) {
+  const osc = ctx.createOscillator(), gain = ctx.createGain();
   osc.connect(gain); gain.connect(ctx.destination);
   osc.type = type; osc.frequency.value = freq;
   gain.gain.setValueAtTime(0, ctx.currentTime);
   gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + attack);
-  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
-  osc.start(ctx.currentTime); osc.stop(ctx.currentTime + duration + 0.05);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+  osc.start(ctx.currentTime); osc.stop(ctx.currentTime + dur + 0.05);
 }
 function playSound(type) {
   try {
     const ctx = getAudio();
-    if (type === 'ding') {
-      playTone(ctx, 523.25, 0.25, 'sine');
-    } else if (type === 'bell') {
-      [523.25, 1046.5, 1568, 2093].forEach((f, i) =>
-        setTimeout(() => playTone(ctx, f, 0.8 - i * 0.12, 'sine', 0.02 + i * 0.01), i * 40));
-    }
+    if (type === 'ding') playTone(ctx, 523.25, 0.25);
+    else if (type === 'bell')
+      [523.25,1046.5,1568,2093].forEach((f,i) =>
+        setTimeout(() => playTone(ctx, f, 0.8-i*0.12,'sine',0.02+i*0.01), i*40));
   } catch(e) {}
 }
 
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 // CONFETTI
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 function launchConfetti() {
-  const canvas = document.getElementById('confetti-canvas');
-  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-  const ctx = canvas.getContext('2d');
+  const cv = document.getElementById('confetti-canvas');
+  cv.width = window.innerWidth; cv.height = window.innerHeight;
+  const ctx = cv.getContext('2d');
   const colors = ['#f093fb','#ffdd57','#43e97b','#4facfe','#ff6b6b','#f9ca24','#fff'];
   const pieces = Array.from({length:150}, () => ({
-    x: Math.random() * canvas.width,
-    y: -20 - Math.random() * 180,
-    r: 6 + Math.random() * 7,
-    d: 2 + Math.random() * 4,
-    color: colors[Math.floor(Math.random()*colors.length)],
-    angle: 0,
-    tiltSpeed: 0.1 + Math.random() * 0.15,
+    x: Math.random()*cv.width, y:-20-Math.random()*180,
+    r:6+Math.random()*7, d:2+Math.random()*4,
+    color:colors[Math.floor(Math.random()*colors.length)],
+    angle:0, tiltSpeed:0.1+Math.random()*0.15,
   }));
-  let frame = 0;
-  function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  let frame=0;
+  (function draw() {
+    ctx.clearRect(0,0,cv.width,cv.height);
     pieces.forEach(p => {
-      p.angle += p.tiltSpeed; p.y += p.d; p.x += Math.sin(p.angle) * 1.5;
-      const tilt = Math.sin(p.angle) * 12;
-      ctx.beginPath(); ctx.lineWidth = p.r / 2; ctx.strokeStyle = p.color;
-      ctx.moveTo(p.x + tilt + p.r/4, p.y); ctx.lineTo(p.x + tilt, p.y + tilt + p.r);
-      ctx.stroke();
+      p.angle+=p.tiltSpeed; p.y+=p.d; p.x+=Math.sin(p.angle)*1.5;
+      const t=Math.sin(p.angle)*12;
+      ctx.beginPath(); ctx.lineWidth=p.r/2; ctx.strokeStyle=p.color;
+      ctx.moveTo(p.x+t+p.r/4,p.y); ctx.lineTo(p.x+t,p.y+t+p.r); ctx.stroke();
     });
-    if (++frame < 170) requestAnimationFrame(draw);
-    else ctx.clearRect(0,0,canvas.width,canvas.height);
-  }
-  draw();
+    if(++frame<170) requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,cv.width,cv.height);
+  })();
 }
 
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 // HELPERS
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+  for (let i=arr.length-1;i>0;i--) {
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
   }
   return arr;
 }
 
-// Pre-load voices on iOS (must be triggered by user interaction)
 document.addEventListener('click', () => {
   if (window.speechSynthesis) window.speechSynthesis.getVoices();
-}, { once: true });
+}, {once:true});
 
-// Init setup screen
 renderSetup();
 </script>
 </body>
