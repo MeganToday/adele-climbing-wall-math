@@ -681,7 +681,7 @@ html, body {
 const STUFFY_DEFS = [
   { id: 'bunny',    icon: '🐰', img: null, label: 'Bunny',      unlockLevel: 0 },
   { id: 'bear',     icon: '🐻', img: null, label: 'Bear',       unlockLevel: 0 },
-  { id: 'pinkbear', icon: '🩷', img: null, label: 'Pink Bear',  unlockLevel: 0 },
+  { id: 'pinkbear', icon: '🐸', img: null, label: 'Frog',       unlockLevel: 0 },
   { id: 'koala',    icon: '🐨', img: null, label: 'Koala',      unlockLevel: 0 },
   { id: 'spider',   icon: '🕷️', img: null, label: 'Spider',     unlockLevel: 0 },
   // Earned stuffies — one unlocked per level 1-3, choice of 5 on level 4
@@ -933,12 +933,14 @@ function getReachableFrom(wall, rockId) {
 
 function updateReachability(wall) {
   const allRocks = wall.rows.flat();
-  // Reachable: if currentRockId is null, bottom row. Otherwise, rocks above current.
   const cur = wall.currentRockId;
-  if (cur === null) {
-    // already seeded
-    return;
-  }
+  if (cur === null) return;
+
+  // Reset every non-solved, non-grayed rock to inactive first,
+  // then only light up the rocks directly above the current position.
+  allRocks.forEach(r => {
+    if (r.state === 'reachable') r.state = 'inactive';
+  });
   const newReachable = getReachableFrom(wall, cur);
   newReachable.forEach(r => {
     if (r.state === 'inactive') r.state = 'reachable';
