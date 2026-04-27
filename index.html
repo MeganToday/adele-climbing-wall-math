@@ -936,14 +936,18 @@ function updateReachability(wall) {
   const cur = wall.currentRockId;
   if (cur === null) return;
 
-  // Reset every non-solved, non-grayed rock to inactive first,
-  // then only light up the rocks directly above the current position.
+  const curRock = allRocks.find(r => r.id === cur);
+  const curRowIdx = curRock ? curRock.row : 0;
+
+  // Reset all reachable rocks — including any in the same or lower rows.
   allRocks.forEach(r => {
     if (r.state === 'reachable') r.state = 'inactive';
   });
+
+  // Only rocks strictly above (higher row index) the current rock can be reachable.
   const newReachable = getReachableFrom(wall, cur);
   newReachable.forEach(r => {
-    if (r.state === 'inactive') r.state = 'reachable';
+    if (r.state === 'inactive' && r.row > curRowIdx) r.state = 'reachable';
   });
 }
 
@@ -1003,19 +1007,31 @@ function drawWall() {
 
   const allRocks = game.wall.rows.flat();
 
-  // Draw connection lines first (behind rocks)
+  // Draw connection lines first (behind rocks).
+  // Draw all faint structural lines, then bright lines to currently reachable rocks.
   allRocks.forEach(rock => {
-    if (!rock.parentsUp) return;
+    if (!rock.childrenUp) return;
     const pos = rockPositions[rock.id];
     if (!pos) return;
-    rock.parentsUp.forEach(pid => {
-      const ppos = rockPositions[pid];
-      if (!ppos) return;
+    rock.childrenUp.forEach(cid => {
+      const cpos = rockPositions[cid];
+      if (!cpos) return;
+      const child = allRocks.find(r => r.id === cid);
+      const isActive = child && child.state === 'reachable';
+      const isSolvedPath = rock.state === 'solved' && child && child.state === 'solved';
       ctx.beginPath();
       ctx.moveTo(pos.x, pos.y);
-      ctx.lineTo(ppos.x, ppos.y);
-      ctx.strokeStyle = 'rgba(255,255,255,0.18)';
-      ctx.lineWidth = 2;
+      ctx.lineTo(cpos.x, cpos.y);
+      if (isActive) {
+        ctx.strokeStyle = 'rgba(255,221,87,0.75)';
+        ctx.lineWidth = 3;
+      } else if (isSolvedPath) {
+        ctx.strokeStyle = 'rgba(67,233,123,0.5)';
+        ctx.lineWidth = 2;
+      } else {
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+        ctx.lineWidth = 1.5;
+      }
       ctx.stroke();
     });
   });
