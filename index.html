@@ -899,39 +899,36 @@ function buildWall(levelNum) {
     rows.push(row);
   });
 
-  // Build adjacency: rock r at (row, col) connects upward to rocks in row-1
-  // whose col indices overlap (using fractional positioning)
+  // Build adjacency: for each rock, store childrenUp — the 2 closest rocks
+  // in the row above it (by fractional horizontal position).
+  // Solving a rock unlocks its childrenUp.
   rows.forEach((row, ri) => {
-    if (ri === 0) return;
-    const prevRow = rows[ri - 1];
+    const nextRowIdx = ri + 1;
+    if (nextRowIdx >= rows.length) return;
+    const nextRow = rows[nextRowIdx];
     row.forEach(rock => {
-      // fractional position in [0,1]
       const frac = rock.col / Math.max(1, rock.rowSize - 1);
-      // find closest 2 rocks in prevRow
-      const prevFracs = prevRow.map(r => ({
+      const nextFracs = nextRow.map(r => ({
         rock: r,
         dist: Math.abs(r.col / Math.max(1, r.rowSize - 1) - frac)
       }));
-      prevFracs.sort((a,b) => a.dist - b.dist);
-      rock.parentsUp = prevFracs.slice(0, 2).map(x => x.rock.id);
+      nextFracs.sort((a, b) => a.dist - b.dist);
+      rock.childrenUp = nextFracs.slice(0, 2).map(x => x.rock.id);
     });
   });
 
-  // Bottom row all reachable to start
+  // Bottom row all reachable to start — Adele picks her starting rock
   rows[0].forEach(r => r.state = 'reachable');
 
   return { rows, currentRockId: null };
 }
 
 function getReachableFrom(wall, rockId) {
-  // Rocks reachable from a solved rock: rocks in the row above whose parentsUp includes rockId
-  if (rockId === null) return []; // at bottom, already seeded
+  if (rockId === null) return [];
   const allRocks = wall.rows.flat();
   const rock = allRocks.find(r => r.id === rockId);
-  if (!rock) return [];
-  const nextRowIdx = rock.row - 1;
-  if (nextRowIdx < 0) return [];
-  return wall.rows[nextRowIdx].filter(r => r.parentsUp && r.parentsUp.includes(rockId));
+  if (!rock || !rock.childrenUp) return [];
+  return rock.childrenUp.map(id => allRocks.find(r => r.id === id)).filter(Boolean);
 }
 
 function updateReachability(wall) {

@@ -26,7 +26,7 @@ Everything lives in one file: HTML structure → `<style>` block → `<script>` 
 
 4. **`game`** — Runtime state reset on each `startLevel()` call (wall, solve count, miss count, active rock).
 
-5. **Wall generation** (`buildWall`, `WALL_ROW_SIZES`) — Creates a DAG of 30 rocks across 7 rows `[7,6,5,5,4,2,1]`. Rows are indexed bottom=0, top=6. Each rock stores `parentsUp` (IDs of the 2 closest rocks in the row above, by fractional position). Reachability propagates upward from the solved rock via `updateReachability` → `getReachableFrom`.
+5. **Wall generation** (`buildWall`, `WALL_ROW_SIZES`) — Creates a DAG of 30 rocks across 7 rows `[7,6,5,5,4,2,1]`. Rows are indexed bottom=0, top=6. Each rock stores `childrenUp` (IDs of the 2 closest rocks in the row above it, by fractional horizontal position). Solving a rock calls `updateReachability` → `getReachableFrom`, which reads `childrenUp` from the just-solved rock and marks those rocks `'reachable'`.
 
 6. **Canvas rendering** (`drawWall`, `drawRock`, `computeRockPositions`) — Rocks are drawn as seeded irregular polygons (`getRockPoints` + `seededRng`). `rockPositions` maps rock id → `{x, y, r}` and is recomputed on resize. The stuffy emoji is drawn above `currentRockId`.
 
