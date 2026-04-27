@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Adele & Nana's Bingo</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; height: 100%;
+  font-family: 'Segoe UI', Helvetica, sans-serif;
+  background: #1a1a2e;
+  overflow: hidden;
+  touch-action: manipulation;
+}
+#app {
+  width: 100vw; height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+.screen {
+  display: none;
+  width: 100%; height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0; left: 0;
+  padding: 20px;
+  overflow-y: auto;
+}
+.screen.active { display: flex; }
+
+/* ── BUTTONS ── */
+.btn {
+  padding: 16px 36px;
+  font-size: clamp(17px, 3vw, 26px);
+  font-weight: bold;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  transition: transform 0.1s, box-shadow 0.1s;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+}
+.btn:active { transform: scale(0.94); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+.btn-adele  { background: linear-gradient(135deg,#f093fb,#764ba2); color:#fff; }
+.btn-nana   { background: linear-gradient(135deg,#f9ca24,#6ab04c); color:#fff; }
+.btn-primary { background: #ffdd57; color: #333; }
+.btn-secondary { background: rgba(255,255,255,0.2); color:#fff; border: 2px solid rgba(255,255,255,0.4); }
+.btn-danger  { background: #ff6b6b; color:#fff; }
+.btn-small { padding: 10px 22px; font-size: clamp(13px,2.2vw,19px); }
+
+/* ── WELCOME ── */
+#screen-welcome {
+  background: linear-gradient(135deg,#1a1a2e 0%,#2d1b4e 100%);
+  text-align: center;
+  gap: 20px;
+}
+.welcome-title {
+  font-size: clamp(30px,7vw,64px);
+  color: #fff;
+  text-shadow: 3px 3px 8px rgba(0,0,0,0.5);
+  line-height: 1.15;
+}
+.welcome-sub {
+  font-size: clamp(16px,3vw,26px);
+  color: rgba(255,255,255,0.75);
+}
+.welcome-emoji { font-size: clamp(60px,12vw,100px); animation: bounce 2s infinite; }
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+.player-btns { display:flex; gap:20px; flex-wrap:wrap; justify-content:center; margin-top:8px; }
+.player-btn-wrap { display:flex; flex-direction:column; align-items:center; gap:8px; }
+.player-btn-wrap .btn { font-size: clamp(20px,4vw,34px); padding:22px 44px; }
+
+/* ── SETUP ── */
+#screen-setup {
+  gap: 18px;
+  text-align: center;
+}
+.setup-header {
+  font-size: clamp(22px,5vw,42px);
+  font-weight: bold;
+  color: #fff;
+}
+.list-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.list-tab {
+  padding: 10px 20px;
+  border-radius: 30px;
+  border: 2px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  font-size: clamp(14px,2.2vw,19px);
+  font-weight: bold;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s, border-color 0.15s;
+}
+.list-tab.active { border-color: #ffdd57; background: rgba(255,221,87,0.25); color:#ffdd57; }
+.list-tab:active { transform: scale(0.95); }
+.list-preview {
+  background: rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 14px 18px;
+  max-width: 500px;
+  width: 100%;
+  color: rgba(255,255,255,0.7);
+  font-size: clamp(12px,2vw,16px);
+  line-height: 1.6;
+  max-height: 120px;
+  overflow-y: auto;
+}
+.caller-question {
+  background: rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 16px 20px;
+  max-width: 460px;
+  width: 100%;
+}
+.caller-question p {
+  color:#fff; font-size: clamp(15px,2.5vw,21px); margin-bottom:12px;
+}
+.caller-btns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+
+/* ── GAME ── */
+#screen-game {
+  padding: 0;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+.game-top {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.game-top .player-tag {
+  font-size: clamp(14px,2.5vw,22px);
+  font-weight: bold;
+  color: #fff;
+  white-space: nowrap;
+}
+.game-top-btns { display:flex; gap:8px; align-items:center; }
+
+/* CARD */
+.card-area {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px 10px;
+  overflow: hidden;
+}
+.bingo-header {
+  display: grid;
+  grid-template-columns: repeat(5,1fr);
+  width: 100%;
+  max-width: min(98vw, calc(100vh - 120px));
+  gap: 5px;
+  margin-bottom: 5px;
+}
+.bingo-header-cell {
+  text-align: center;
+  font-size: clamp(18px,4vw,34px);
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+  letter-spacing: 2px;
+}
+.bingo-grid {
+  display: grid;
+  grid-template-columns: repeat(5,1fr);
+  gap: 5px;
+  width: 100%;
+  max-width: min(98vw, calc(100vh - 120px));
+}
+.bingo-cell {
+  aspect-ratio: 1;
+  border-radius: 12px;
+  border: 3px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(11px, 2.8vw, 22px);
+  font-weight: bold;
+  color: #fff;
+  text-align: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.1s, background 0.2s, border-color 0.2s;
+  padding: 3px;
+  line-height: 1.1;
+  word-break: break-word;
+  user-select: none;
+}
+.bingo-cell:active { transform: scale(0.91); }
+.bingo-cell.marked-adele {
+  background: linear-gradient(135deg,#f093fb88,#764ba2cc);
+  border-color: #f093fb;
+  box-shadow: 0 0 10px #f093fb88;
+}
+.bingo-cell.marked-nana {
+  background: linear-gradient(135deg,#f9ca2488,#6ab04ccc);
+  border-color: #f9ca24;
+  box-shadow: 0 0 10px #f9ca2488;
+}
+.bingo-cell.free {
+  background: rgba(255,255,255,0.25);
+  border-color: rgba(255,255,255,0.5);
+  cursor: default;
+}
+.bingo-cell.win-cell {
+  animation: winPulse 0.7s ease infinite alternate;
+}
+@keyframes winPulse {
+  from { box-shadow: 0 0 8px #ffdd57; border-color:#ffdd57; }
+  to   { box-shadow: 0 0 22px #ffdd57, 0 0 40px #ffdd57; border-color:#fff; }
+}
+
+/* CALLER VIEW */
+.caller-view {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 16px 16px;
+  overflow-y: auto;
+  gap: 12px;
+}
+.current-word-box {
+  background: rgba(255,255,255,0.12);
+  border-radius: 24px;
+  padding: 20px 32px;
+  text-align: center;
+  width: 100%;
+  max-width: 500px;
+}
+.current-word {
+  font-size: clamp(48px,12vw,96px);
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 3px 3px 8px rgba(0,0,0,0.4);
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 2px;
+}
+.current-word.pop {
+  animation: wordPop 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+@keyframes wordPop {
+  0%   { transform: scale(0.5); opacity:0; }
+  70%  { transform: scale(1.1); }
+  100% { transform: scale(1); opacity:1; }
+}
+.word-count {
+  font-size: clamp(13px,2vw,18px);
+  color: rgba(255,255,255,0.6);
+  margin-top: 6px;
+}
+.called-list-label {
+  font-size: clamp(13px,2vw,18px);
+  color: rgba(255,255,255,0.7);
+  font-weight: bold;
+  align-self: flex-start;
+  max-width: 500px;
+  width:100%;
+}
+.called-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 140px;
+  overflow-y: auto;
+}
+.called-chip {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: clamp(13px,2vw,17px);
+  font-weight: bold;
+}
+.called-chip.newest {
+  background: #ffdd57;
+  color: #333;
+}
+
+/* CALLED WORDS OVERLAY */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 80;
+  align-items: center;
+  justify-content: center;
+}
+.overlay.active { display:flex; }
+.overlay-box {
+  background: #1e1e3a;
+  border-radius: 24px;
+  padding: 24px;
+  width: min(480px,92vw);
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.overlay-title {
+  font-size: clamp(18px,3.5vw,28px);
+  color:#fff;
+  font-weight:bold;
+  text-align:center;
+}
+.overlay-words {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* WIN OVERLAY */
+#win-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  z-index: 150;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  padding: 24px;
+  gap: 20px;
+}
+#win-overlay.active { display:flex; }
+.win-title {
+  font-size: clamp(52px,14vw,110px);
+  font-weight:900;
+  color:#ffdd57;
+  text-shadow: 4px 4px 12px rgba(0,0,0,0.5);
+  animation: winPop 0.6s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+@keyframes winPop {
+  0% { transform:scale(0); opacity:0; }
+  70%{ transform:scale(1.15); }
+  100%{ transform:scale(1); opacity:1; }
+}
+.win-sub {
+  font-size: clamp(22px,5vw,42px);
+  color:#fff;
+  text-shadow: 2px 2px 6px rgba(0,0,0,0.4);
+}
+
+/* CONFETTI */
+#confetti-canvas {
+  position: fixed;
+  top:0; left:0;
+  width:100vw; height:100vh;
+  pointer-events:none;
+  z-index:200;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.25); border-radius:3px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ══ WELCOME ══════════════════════════════════════════════ -->
+  <div id="screen-welcome" class="screen active">
+    <div class="welcome-emoji">🎴</div>
+    <div class="welcome-title">Adele & Nana's<br><span style="color:#f9ca24">Bingo!</span> 🎉</div>
+    <div class="welcome-sub">A sight word game for two</div>
+    <div class="player-btns">
+      <div class="player-btn-wrap">
+        <button class="btn btn-adele" onclick="choosePlayer('adele')">I'm Adele! 🌸</button>
+      </div>
+      <div class="player-btn-wrap">
+        <button class="btn btn-nana" onclick="choosePlayer('nana')">I'm Nana! 🌻</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SETUP ════════════════════════════════════════════════ -->
+  <div id="screen-setup" class="screen">
+    <div class="setup-header" id="setup-header">Adele's Setup 🌸</div>
+    <div style="color:rgba(255,255,255,0.7);font-size:clamp(14px,2.2vw,19px)">Choose a word list:</div>
+    <div class="list-tabs" id="list-tabs"></div>
+    <div class="list-preview" id="list-preview"></div>
+    <div class="caller-question">
+      <p>Who is calling the words this round?</p>
+      <div class="caller-btns">
+        <button class="btn btn-primary btn-small" onclick="setCaller(true)">I am! 📣</button>
+        <button class="btn btn-secondary btn-small" onclick="setCaller(false)">The other player is</button>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="startGame()" style="margin-top:4px">Make My Card! 🎴</button>
+    <button class="btn btn-secondary btn-small" onclick="showScreen('welcome')" style="margin-top:8px">← Back</button>
+  </div>
+
+  <!-- ══ GAME ═════════════════════════════════════════════════ -->
+  <div id="screen-game" class="screen">
+    <div class="game-top" id="game-top">
+      <span class="player-tag" id="game-player-tag">🌸 Adele</span>
+      <div class="game-top-btns">
+        <button class="btn btn-small" id="btn-toggle-view" onclick="toggleView()" style="display:none">📣 Caller View</button>
+        <button class="btn btn-secondary btn-small" onclick="showCalledOverlay()">📋 Words</button>
+        <button class="btn btn-secondary btn-small" onclick="newGame()">🔄 New</button>
+        <button class="btn btn-secondary btn-small" onclick="showScreen('welcome')">🏠</button>
+      </div>
+    </div>
+
+    <!-- Caller view -->
+    <div class="caller-view" id="caller-view" style="display:none">
+      <div class="current-word-box">
+        <div class="current-word" id="current-word">—</div>
+        <div class="word-count" id="word-count">0 words called</div>
+      </div>
+      <button class="btn btn-primary" id="btn-draw" onclick="drawWord()" style="font-size:clamp(20px,4vw,32px);padding:20px 48px">
+        Draw a Word! 🎲
+      </button>
+      <div class="called-list-label">Called so far:</div>
+      <div class="called-list" id="called-list"></div>
+      <button class="btn btn-secondary btn-small" onclick="toggleView()">🎴 Show My Card</button>
+    </div>
+
+    <!-- Card view -->
+    <div class="card-area" id="card-area">
+      <div class="bingo-header">
+        <div class="bingo-header-cell">B</div>
+        <div class="bingo-header-cell">I</div>
+        <div class="bingo-header-cell">N</div>
+        <div class="bingo-header-cell">G</div>
+        <div class="bingo-header-cell">O</div>
+      </div>
+      <div class="bingo-grid" id="bingo-grid"></div>
+    </div>
+  </div>
+
+  <!-- ══ CALLED WORDS OVERLAY ═════════════════════════════════ -->
+  <div class="overlay" id="called-overlay">
+    <div class="overlay-box">
+      <div class="overlay-title">📋 Words Called</div>
+      <div class="overlay-words" id="overlay-words"></div>
+      <button class="btn btn-secondary btn-small" onclick="hideCalledOverlay()" style="align-self:center">Close</button>
+    </div>
+  </div>
+
+  <!-- ══ WIN OVERLAY ══════════════════════════════════════════ -->
+  <div id="win-overlay">
+    <div class="win-title">🎉 BINGO! 🎉</div>
+    <div class="win-sub" id="win-sub">Adele wins this round!</div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center">
+      <button class="btn btn-primary" onclick="newGame()">Play Again! 🎴</button>
+      <button class="btn btn-secondary" onclick="showScreen('welcome')">🏠 Home</button>
+    </div>
+  </div>
+
+  <canvas id="confetti-canvas"></canvas>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// WORD LISTS — add or edit lists here
+// ═══════════════════════════════════════════════════════════════
+const WORD_LISTS = [
+  {
+    name: 'List 1 — Easiest',
+    words: ['a','and','away','big','blue','can','come','down','find','for',
+            'funny','go','help','here','I','in','is','it','jump','little',
+            'look','make','me','my','not','one','play','red','run','said',
+            'see','the','three','two','up','we','where','yellow','you']
+  },
+  {
+    name: 'List 2 — Kindergarten',
+    words: ['all','am','are','at','ate','be','black','brown','but','came',
+            'did','do','eat','four','get','good','have','he','into','like',
+            'must','new','no','now','on','our','out','please','pretty','ran',
+            'ride','saw','say','she','so','soon','that','there','they','this',
+            'too','under','want','was','well','went','what','white','who','will',
+            'with','yes']
+  },
+  {
+    name: 'List 3 — Challenge',
+    words: ['after','again','an','any','ask','by','could','every','fly','from',
+            'give','going','had','has','her','him','his','how','just','know',
+            'let','live','may','of','old','once','open','over','put','round',
+            'some','stop','take','thank','them','then','think','walk','were','when']
+  },
+];
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+const gs = {
+  player: 'adele',      // 'adele' | 'nana'
+  isCaller: false,
+  listIdx: 0,
+  card: [],             // 5x5 array of words, '' for FREE
+  marked: [],           // 5x5 booleans
+  calledWords: [],      // drawn words in order
+  remainingWords: [],   // pool not yet drawn
+  showingCallerView: false,
+  won: false,
+};
+
+// ═══════════════════════════════════════════════════════════════
+// SCREEN NAV
+// ═══════════════════════════════════════════════════════════════
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// WELCOME
+// ═══════════════════════════════════════════════════════════════
+function choosePlayer(player) {
+  gs.player = player;
+  renderSetup();
+  showScreen('setup');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SETUP
+// ═══════════════════════════════════════════════════════════════
+function renderSetup() {
+  const isAdele = gs.player === 'adele';
+  document.getElementById('setup-header').textContent =
+    isAdele ? "Adele's Setup 🌸" : "Nana's Setup 🌻";
+
+  // List tabs
+  const tabs = document.getElementById('list-tabs');
+  tabs.innerHTML = '';
+  WORD_LISTS.forEach((list, i) => {
+    const tab = document.createElement('button');
+    tab.className = 'list-tab' + (i === gs.listIdx ? ' active' : '');
+    tab.textContent = list.name;
+    tab.onclick = () => { gs.listIdx = i; renderSetup(); };
+    tabs.appendChild(tab);
+  });
+
+  // Preview
+  document.getElementById('list-preview').textContent =
+    WORD_LISTS[gs.listIdx].words.join(', ');
+}
+
+function setCaller(val) {
+  gs.isCaller = val;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GAME START
+// ═══════════════════════════════════════════════════════════════
+function startGame() {
+  generateCard();
+  gs.calledWords = [];
+  gs.remainingWords = shuffle([...WORD_LISTS[gs.listIdx].words]);
+  gs.won = false;
+  gs.showingCallerView = gs.isCaller;
+
+  // Style game screen per player
+  const isAdele = gs.player === 'adele';
+  const gameScreen = document.getElementById('screen-game');
+  gameScreen.style.background = isAdele
+    ? 'linear-gradient(135deg,#2d1b4e 0%,#1a1a2e 100%)'
+    : 'linear-gradient(135deg,#1a3a1a 0%,#1a1a2e 100%)';
+
+  document.getElementById('game-player-tag').textContent =
+    isAdele ? '🌸 Adele' : '🌻 Nana';
+
+  const toggleBtn = document.getElementById('btn-toggle-view');
+  toggleBtn.style.display = gs.isCaller ? 'inline-block' : 'none';
+
+  renderCard();
+  updateCallerView();
+  applyView();
+  showScreen('game');
+}
+
+function newGame() {
+  document.getElementById('win-overlay').classList.remove('active');
+  startGame();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CARD GENERATION
+// ═══════════════════════════════════════════════════════════════
+function generateCard() {
+  const words = shuffle([...WORD_LISTS[gs.listIdx].words]).slice(0, 24);
+  gs.card = [];
+  gs.marked = [];
+  let wi = 0;
+  for (let r = 0; r < 5; r++) {
+    gs.card.push([]);
+    gs.marked.push([]);
+    for (let c = 0; c < 5; c++) {
+      if (r === 2 && c === 2) {
+        gs.card[r].push('FREE');
+        gs.marked[r].push(true);
+      } else {
+        gs.card[r].push(words[wi++]);
+        gs.marked[r].push(false);
+      }
+    }
+  }
+}
+
+function renderCard() {
+  const grid = document.getElementById('bingo-grid');
+  grid.innerHTML = '';
+  const markedClass = gs.player === 'adele' ? 'marked-adele' : 'marked-nana';
+  for (let r = 0; r < 5; r++) {
+    for (let c = 0; c < 5; c++) {
+      const cell = document.createElement('div');
+      const isFree = r === 2 && c === 2;
+      cell.className = 'bingo-cell' +
+        (gs.marked[r][c] ? ' ' + (isFree ? 'free ' : '') + markedClass : '') +
+        (isFree ? ' free' : '');
+      cell.textContent = isFree ? '⭐ FREE' : gs.card[r][c];
+      if (!isFree) {
+        const row = r, col = c;
+        cell.addEventListener('click', () => toggleCell(row, col));
+      }
+      grid.appendChild(cell);
+    }
+  }
+}
+
+function toggleCell(r, c) {
+  if (gs.won) return;
+  gs.marked[r][c] = !gs.marked[r][c];
+  renderCard();
+  if (checkBingo()) triggerWin();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BINGO CHECK
+// ═══════════════════════════════════════════════════════════════
+function checkBingo() {
+  const m = gs.marked;
+  // rows
+  for (let r = 0; r < 5; r++) {
+    if (m[r].every(v => v)) return winLine(r, null, null);
+  }
+  // cols
+  for (let c = 0; c < 5; c++) {
+    if (m.every(row => row[c])) return winLine(null, c, null);
+  }
+  // diag top-left to bottom-right
+  if ([0,1,2,3,4].every(i => m[i][i])) return winLine(null, null, 'tlbr');
+  // diag top-right to bottom-left
+  if ([0,1,2,3,4].every(i => m[i][4-i])) return winLine(null, null, 'trbl');
+  return false;
+}
+
+function winLine(row, col, diag) {
+  // Highlight winning cells
+  const cells = document.querySelectorAll('.bingo-cell');
+  const coords = [];
+  if (row !== null) for (let c=0;c<5;c++) coords.push(row*5+c);
+  if (col !== null) for (let r=0;r<5;r++) coords.push(r*5+col);
+  if (diag === 'tlbr') for (let i=0;i<5;i++) coords.push(i*5+i);
+  if (diag === 'trbl') for (let i=0;i<5;i++) coords.push(i*5+(4-i));
+  coords.forEach(idx => cells[idx] && cells[idx].classList.add('win-cell'));
+  return true;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// WIN
+// ═══════════════════════════════════════════════════════════════
+function triggerWin() {
+  gs.won = true;
+  playSound('bell');
+  launchConfetti();
+  const name = gs.player === 'adele' ? 'Adele' : 'Nana';
+  document.getElementById('win-sub').textContent = `${name} wins this round! 🎊`;
+  setTimeout(() => document.getElementById('win-overlay').classList.add('active'), 600);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CALLER
+// ═══════════════════════════════════════════════════════════════
+function drawWord() {
+  if (gs.remainingWords.length === 0) {
+    document.getElementById('current-word').textContent = '🎉 All done!';
+    return;
+  }
+  const word = gs.remainingWords.pop();
+  gs.calledWords.unshift(word);
+  playSound('ding');
+  // Display
+  const el = document.getElementById('current-word');
+  el.textContent = word;
+  el.classList.remove('pop');
+  void el.offsetWidth;
+  el.classList.add('pop');
+  document.getElementById('word-count').textContent =
+    `${gs.calledWords.length} word${gs.calledWords.length === 1 ? '' : 's'} called`;
+  updateCallerView();
+  speakWord(word);
+}
+
+function speakWord(word) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const say = (text) => {
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.rate = 0.85;
+    utt.pitch = 1.1;
+    // Prefer a female English voice
+    const voices = window.speechSynthesis.getVoices();
+    const preferred = voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('female'))
+      || voices.find(v => v.lang.startsWith('en') && /samantha|karen|victoria|moira|tessa|fiona/i.test(v.name))
+      || voices.find(v => v.lang.startsWith('en'));
+    if (preferred) utt.voice = preferred;
+    window.speechSynthesis.speak(utt);
+  };
+  say(word);
+  setTimeout(() => say(word), 1200);
+}
+
+function updateCallerView() {
+  const list = document.getElementById('called-list');
+  list.innerHTML = '';
+  gs.calledWords.forEach((w, i) => {
+    const chip = document.createElement('span');
+    chip.className = 'called-chip' + (i === 0 ? ' newest' : '');
+    chip.textContent = w;
+    list.appendChild(chip);
+  });
+  // overlay
+  const ow = document.getElementById('overlay-words');
+  ow.innerHTML = '';
+  gs.calledWords.forEach((w, i) => {
+    const chip = document.createElement('span');
+    chip.className = 'called-chip' + (i === 0 ? ' newest' : '');
+    chip.textContent = w;
+    ow.appendChild(chip);
+  });
+}
+
+function toggleView() {
+  gs.showingCallerView = !gs.showingCallerView;
+  applyView();
+}
+
+function applyView() {
+  const callerView = document.getElementById('caller-view');
+  const cardArea = document.getElementById('card-area');
+  const toggleBtn = document.getElementById('btn-toggle-view');
+  if (gs.showingCallerView) {
+    callerView.style.display = 'flex';
+    cardArea.style.display = 'none';
+    toggleBtn.textContent = '🎴 My Card';
+  } else {
+    callerView.style.display = 'none';
+    cardArea.style.display = 'flex';
+    toggleBtn.textContent = '📣 Caller View';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CALLED WORDS OVERLAY
+// ═══════════════════════════════════════════════════════════════
+function showCalledOverlay() {
+  updateCallerView();
+  document.getElementById('called-overlay').classList.add('active');
+}
+function hideCalledOverlay() {
+  document.getElementById('called-overlay').classList.remove('active');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SOUND
+// ═══════════════════════════════════════════════════════════════
+let audioCtx = null;
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+function playTone(ctx, freq, duration, type = 'sine', attack = 0.01) {
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.type = type; osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0, ctx.currentTime);
+  gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + attack);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+  osc.start(ctx.currentTime); osc.stop(ctx.currentTime + duration + 0.05);
+}
+function playSound(type) {
+  try {
+    const ctx = getAudio();
+    if (type === 'ding') {
+      playTone(ctx, 523.25, 0.25, 'sine');
+    } else if (type === 'bell') {
+      [523.25, 1046.5, 1568, 2093].forEach((f, i) =>
+        setTimeout(() => playTone(ctx, f, 0.8 - i * 0.12, 'sine', 0.02 + i * 0.01), i * 40));
+    }
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CONFETTI
+// ═══════════════════════════════════════════════════════════════
+function launchConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+  const ctx = canvas.getContext('2d');
+  const colors = ['#f093fb','#ffdd57','#43e97b','#4facfe','#ff6b6b','#f9ca24','#fff'];
+  const pieces = Array.from({length:150}, () => ({
+    x: Math.random() * canvas.width,
+    y: -20 - Math.random() * 180,
+    r: 6 + Math.random() * 7,
+    d: 2 + Math.random() * 4,
+    color: colors[Math.floor(Math.random()*colors.length)],
+    angle: 0,
+    tiltSpeed: 0.1 + Math.random() * 0.15,
+  }));
+  let frame = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => {
+      p.angle += p.tiltSpeed; p.y += p.d; p.x += Math.sin(p.angle) * 1.5;
+      const tilt = Math.sin(p.angle) * 12;
+      ctx.beginPath(); ctx.lineWidth = p.r / 2; ctx.strokeStyle = p.color;
+      ctx.moveTo(p.x + tilt + p.r/4, p.y); ctx.lineTo(p.x + tilt, p.y + tilt + p.r);
+      ctx.stroke();
+    });
+    if (++frame < 170) requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  }
+  draw();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// Pre-load voices on iOS (must be triggered by user interaction)
+document.addEventListener('click', () => {
+  if (window.speechSynthesis) window.speechSynthesis.getVoices();
+}, { once: true });
+
+// Init setup screen
+renderSetup();
+</script>
+</body>
+</html>
